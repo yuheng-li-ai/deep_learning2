@@ -1,0 +1,335 @@
+# Project 2 Working Draft
+
+This document is the running English draft for Project 2 of "Neural Network and Deep Learning". It records the assignment requirements, engineering plan, experiment protocol, results, and report-writing notes. Every completed experiment should append its configuration, metrics, figure paths, interpretation, and failure notes here. The final LaTeX report and PDF will be written from this draft.
+
+## 0. Baseline Status
+
+- Assignment PDF: `project_2_2026.pdf`, 6 pages, created on 2026-05-08.
+- GitHub repository: `https://github.com/yuheng-li-ai/deep_learning2`.
+- Local Git note: the environment provides a read-only empty `.git/` directory, so the real local repository metadata is stored in `.git-real/` and Git commands must use `--git-dir=.git-real --work-tree=.`.
+- Main starter code directory: `codes/VGG_BatchNorm/`.
+- Existing figures: `pic/CIFAR-10.png`, `pic/vgg.png`, `pic/loss_landscape.png`, `pic/adam.png`, `pic/dessilbi.png`.
+- Existing bibliography: `bib.bib`.
+
+Environment check on 2026-05-10:
+
+- Python: 3.12.9.
+- PyTorch: 2.6.0+cu126.
+- Torchvision: 0.21.0+cu126.
+- System GPU status from `nvidia-smi`: 3 x NVIDIA RTX A6000, driver 550.54.14, system CUDA 12.4.
+- PyTorch CUDA under normal sandbox: unavailable, with `Can't initialize NVML`.
+- PyTorch CUDA outside sandbox: available, 3 GPUs visible.
+- Tiny CUDA matmul on `cuda:2`: passed. GPU 2 was essentially free during the check.
+
+## 1. Submission Requirements
+
+- Deadline: 23:59, 2026-06-14.
+- Submission platform: elearning.
+- Final submission artifact: one PDF report.
+- The PDF report must include:
+  - Student name.
+  - Student ID.
+  - GitHub link to the code.
+  - Dataset link.
+  - Link to trained model weights.
+- Missing code link or model-weight link will lead to a score penalty.
+- Dataset and model weights may be uploaded to Google Drive or another net-disk platform.
+- Late penalty: 10% score reduction for each delayed week.
+- The write-up must document the experiments and main findings, not only final numbers.
+
+## 2. Score Structure
+
+- Task 1: Train a Network on CIFAR-10, 60%.
+- Task 2: Batch Normalization, 30%.
+- The remaining implicit score depends on report quality, completeness, reproducibility, links, and clarity of interpretation.
+
+## 3. Task 1: CIFAR-10 Classification Requirements
+
+Goal: train neural networks on CIFAR-10, optimize classification performance, report the best test error, and describe the network structure that achieved it.
+
+CIFAR-10 facts:
+
+- 60,000 RGB images.
+- Image size: 32 x 32.
+- 10 classes: airplane, car, bird, cat, deer, dog, frog, horse, ship, truck.
+- 6,000 images per class.
+
+The network must contain all of the following components, worth 16%:
+
+- Fully connected layer.
+- 2D convolutional layer.
+- 2D pooling layer.
+- Activation functions.
+
+The network must contain at least one of the following components, worth 8%:
+
+- Batch normalization.
+- Dropout.
+- Residual connection.
+- Other reasonable component.
+
+The optimization study must try all of the following strategies, worth 8%:
+
+- Different numbers of neurons or filters.
+- Different loss functions, including different regularization settings.
+- Different activation functions.
+
+The project must also choose at least one of the following optimization strategies, worth 8%:
+
+- Try different optimizers using `torch.optim`.
+- Implement an optimizer for a network containing the required basic components, while still using `torch.optim` to optimize the full model.
+- Implement an optimizer for the full model from scratch.
+
+The report must reveal insights about the network, worth 8%. Possible directions:
+
+- Filter visualization.
+- Loss landscape.
+- Network interpretation.
+- Other meaningful visualizations of the model or training process.
+
+Task 1 scoring emphasis:
+
+- Classification performance, especially test error.
+- Number of parameters.
+- Network structure.
+- Training speed.
+- For similar performance, the grader may compare total parameters, structure, and whether new optimization algorithms are used.
+- Insightful learned-model or training-process visualizations are valuable.
+- Reporting multiple networks is allowed.
+- Directly using public models without modification may be penalized.
+
+## 4. Task 2: Batch Normalization Requirements
+
+Goal: test the effectiveness of batch normalization during training, then investigate how batch normalization helps optimization.
+
+Experimental setup:
+
+- Dataset: CIFAR-10 image classification.
+- Architecture: similar to VGG-A, with smaller linear layers because the input is 32 x 32 x 3 rather than 224 x 224 x 3.
+- Starter code: PyTorch.
+- Partial datasets may be used for faster preliminary experiments via `n_items`.
+
+### 4.1 VGG-A With and Without BN
+
+This part is worth 15%.
+
+Requirements:
+
+- Understand the starter code instead of treating it as a black box.
+- Train the baseline `VGG_A` first.
+- Implement `VGG_A_BatchNorm` or an equivalent BN variant by adding BN layers to the original network.
+- Compare the performance and training characteristics of VGG-A with and without BN.
+- Visualize training results for both models.
+- Extending or modifying the starter code for clearer experimental evidence is encouraged.
+
+Recommended records:
+
+- Train loss per epoch.
+- Train accuracy per epoch.
+- Validation/test accuracy per epoch.
+- Best test error and corresponding epoch.
+- Training time.
+- Parameter count.
+- Seed, batch size, optimizer, learning rate, scheduler, and data augmentation.
+
+### 4.2 How BN Helps Optimization
+
+This part is worth 15%.
+
+The PDF asks us to analyze BN from the optimization-landscape perspective. It explicitly mentions:
+
+- Loss landscape or variation of the loss value.
+- Gradient predictiveness or change of the loss gradient.
+- Maximum difference in gradient over distance.
+
+Minimum required loss-landscape experiment from the PDF:
+
+1. Choose a list of learning rates as different step sizes, for example `[1e-3, 2e-3, 1e-4, 5e-4]`.
+2. Train models with those learning rates and save training losses for every step.
+3. Maintain `max_curve` and `min_curve`: for the same training step, take the maximum and minimum losses across all learning-rate runs.
+4. Plot the curves and use `matplotlib.pyplot.fill_between` to fill the region between them.
+5. Repeat the same method for VGG-A with BN and without BN.
+6. Plot the BN and no-BN comparisons in the same figure.
+
+The report must explain:
+
+- The selected learning rates.
+- The reproducibility setup.
+- The final comparison plot.
+- Whether BN makes the loss landscape smoother and what evidence supports that claim.
+
+## 5. Starter Code Findings
+
+Files inspected:
+
+- `codes/VGG_BatchNorm/VGG_Loss_Landscape.py`
+  - Starter training and visualization script for the BN/loss-landscape task.
+  - Contains placeholders for sample inspection, accuracy computation, loss/gradient recording, validation, min/max curves, and plotting.
+  - Hard-codes `cuda:3` and calls `torch.cuda.get_device_name(3)`, but the machine has only GPU indices 0, 1, and 2. This must be fixed before running training.
+  - Imports `VGG_A_BatchNorm`, but that class is not implemented yet.
+- `codes/VGG_BatchNorm/models/vgg.py`
+  - Provides `VGG_A`, `VGG_A_Light`, and `VGG_A_Dropout`.
+  - `VGG_A` already includes convolution, pooling, activations, and fully connected layers.
+  - Imports `init_weights_` from `codes_for_pj.utils.nn`, but the current project tree does not contain `codes_for_pj`; the import path must be fixed.
+- `codes/VGG_BatchNorm/data/loaders.py`
+  - Loads CIFAR-10 through `torchvision.datasets.CIFAR10`.
+  - Supports `n_items` for partial-dataset experiments.
+  - `PartialDataset.__getitem__` lacks an index argument, so partial datasets will fail until fixed.
+- `codes/VGG_BatchNorm/utils/nn.py`
+  - Provides initialization for Conv2d, BatchNorm, and Linear layers.
+
+## 6. Execution Plan
+
+### Phase 1: Git, Environment, and Project Baseline
+
+- Initialize usable Git metadata through `.git-real/`.
+- Connect to `https://github.com/yuheng-li-ai/deep_learning2`.
+- Commit the original materials plus this English draft.
+- Keep generated caches, datasets, model weights, and local ECC files out of Git.
+- Record environment versions and GPU availability.
+
+### Phase 2: Make the Starter Code Runnable
+
+- Fix import paths.
+- Fix `PartialDataset.__getitem__`.
+- Replace hard-coded device selection with robust GPU/CPU selection.
+- Complete training, validation, accuracy, metric saving, and figure saving.
+- Run a small smoke test with a partial dataset and a small epoch count.
+
+### Phase 3: Task 1 Main CIFAR-10 Experiments
+
+Minimum experiment matrix:
+
+- Baseline CNN or VGG-A.
+- Filter/neuron ablation with at least 2 to 3 width or classifier-size variants.
+- Loss and regularization ablation, such as CrossEntropy, weight decay, and optionally label smoothing.
+- Activation ablation, such as ReLU, LeakyReLU, and GELU or SiLU.
+- Optimizer comparison, such as SGD with momentum, Adam, and AdamW.
+- At least one structural enhancement: BN, Dropout, or residual connection.
+
+Each experiment should record:
+
+- Commit hash.
+- Model and configuration.
+- Seed, epochs, batch size, optimizer, learning rate, scheduler, weight decay, activation, loss, and augmentation.
+- Parameter count.
+- Runtime.
+- Best validation/test accuracy.
+- Best test error.
+- Figure paths.
+- Key observations.
+
+### Phase 4: VGG-A BN Comparison
+
+- Implement `VGG_A_BatchNorm`.
+- Train VGG-A without BN and VGG-A with BN under matched settings.
+- Generate comparison plots:
+  - Train loss curve.
+  - Train/test accuracy curve.
+  - Convergence speed.
+  - Final and best test error.
+- Explain the effect of BN on convergence, stability, and generalization.
+
+### Phase 5: BN Optimization-Landscape Study
+
+- Choose learning rates such as `1e-4`, `5e-4`, `1e-3`, and `2e-3`.
+- Run no-BN and BN models across the same learning-rate list.
+- Save per-step losses.
+- Generate min/max curves and filled landscape plots.
+- Optional extensions:
+  - Record gradient norms.
+  - Compute gradient cosine similarity between nearby steps.
+  - Estimate gradient predictiveness.
+  - Estimate maximum gradient difference over comparable distances.
+
+### Phase 6: Final Report
+
+- Convert this draft into an English LaTeX report.
+- Suggested report sections:
+  - Introduction.
+  - CIFAR-10 model design and optimization.
+  - Batch normalization comparison.
+  - Optimization landscape analysis.
+  - Discussion and limitations.
+  - Conclusion.
+  - References.
+- Insert the GitHub link, dataset link, and model-weight link.
+- Export the final PDF.
+- Final checklist:
+  - PDF opens correctly.
+  - Student name and ID are included.
+  - All figures are readable.
+  - GitHub link is accessible.
+  - Dataset and model-weight links are accessible.
+  - Key results can be traced back to this draft and Git commits.
+
+## 7. Candidate Extension Directions
+
+High-priority directions tied closely to scoring:
+
+- Accuracy-parameter-speed trade-off among small VGG, standard VGG-A, BN, Dropout, and residual variants.
+- Data augmentation: random crop, random horizontal flip, Cutout, MixUp, or CutMix.
+- Regularization: weight decay, Dropout, label smoothing.
+- Learning-rate schedules: StepLR, cosine annealing, warmup.
+- Optimizers: SGD with momentum, Adam, AdamW.
+- Filter visualization of the first convolutional layer.
+- Feature-map visualization for selected layers.
+- Confusion matrix and class-level error analysis.
+
+Research-oriented directions for stronger discussion:
+
+- BN stability under high learning rates.
+- Gradient norm and gradient cosine-similarity changes with BN.
+- Whether BN narrows the loss envelope across learning rates.
+- Interaction between BN and Dropout.
+- Relative benefit of residual connections and BN on small CIFAR-10 networks.
+- Wall-clock time and epoch count required to reach a fixed accuracy threshold.
+
+Riskier directions to attempt only if time allows:
+
+- Implementing a custom optimizer.
+- Implementing layers or a full training framework from scratch.
+- DessiLBI or structural sparsity experiments.
+- Large-scale model search.
+
+## 8. Experiment Log Template
+
+Append each experiment using this format:
+
+```markdown
+### Experiment YYYY-MM-DD-NN: <short name>
+
+- Commit:
+- Code changes:
+- Dataset:
+- Model:
+- Parameters:
+- Seed:
+- Device:
+- Epochs:
+- Batch size:
+- Optimizer:
+- Learning rate:
+- Scheduler:
+- Weight decay / regularization:
+- Activation:
+- Loss:
+- Augmentation:
+- Runtime:
+- Best train accuracy:
+- Best validation/test accuracy:
+- Best test error:
+- Saved weights:
+- Figures:
+- Raw metrics:
+- Result summary:
+- Interpretation:
+- Problems / next action:
+```
+
+## 9. Open Items
+
+- Student name and ID will be filled in near final report writing.
+- The final model-weight hosting location is not decided yet.
+- The final dataset link can use the official CIFAR-10 website or a net-disk mirror.
+- Training commands that need CUDA should run outside the normal sandbox because PyTorch CUDA is unavailable inside the sandbox.
