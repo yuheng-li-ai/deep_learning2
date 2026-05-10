@@ -353,7 +353,7 @@ Append each experiment using this format:
 
 ### 2026-05-10: Phase 2 Starter-Code Readiness
 
-- Commit: pending.
+- Commit: `7b03fa3`.
 - Code changes:
   - Fixed `PartialDataset` indexing.
   - Fixed the VGG utility import path.
@@ -372,7 +372,7 @@ Append each experiment using this format:
 
 ### 2026-05-10: Manual Training Command Fix
 
-- Commit: pending.
+- Commit: `c5aa353`.
 - Issue:
   - A manual `nohup` training command failed before Python started because shell redirection tried to create `reports/runs/vgg_a_adam_lr1e-3.log`, but the parent directory did not exist yet.
 - Fix:
@@ -381,3 +381,55 @@ Append each experiment using this format:
 - Training status:
   - The failed command did not run training.
   - The corrected command can be relaunched manually by the user.
+
+## 11. Experiment Results
+
+### Experiment 2026-05-10-01: VGG-A Baseline with Adam
+
+- Commit before training: `c5aa353`.
+- Code state:
+  - Training entry point: `codes/VGG_BatchNorm/train_cifar.py`.
+  - Model: `VGG_A`.
+  - Progress display: `tqdm` epoch, train-batch, and validation-batch progress bars.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: Adam.
+  - Learning rate: 1e-3.
+  - Weight decay: 0.0.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+- Model size:
+  - Parameters: 9,750,922.
+- Runtime:
+  - Total recorded epoch time: 145.52 seconds.
+  - Epoch 1 took 62.32 seconds, likely due to dataset preparation and initial runtime overhead.
+  - Later epochs were approximately 4.3 to 4.5 seconds each.
+- Best result:
+  - Best validation/test accuracy: 0.7651.
+  - Best validation/test error: 0.2349.
+  - Best epoch: 18.
+  - Best checkpoint: `reports/runs/vgg_a_adam_lr1e-3/best.pt`.
+- Final epoch:
+  - Train loss: 0.0977.
+  - Train accuracy: 0.9680.
+  - Validation/test loss: 1.4421.
+  - Validation/test accuracy: 0.7411.
+- Raw metrics:
+  - `reports/runs/vgg_a_adam_lr1e-3/metrics.json`.
+  - `reports/runs/vgg_a_adam_lr1e-3/metrics.csv`.
+- Figure:
+  - `reports/figures/vgg_a_adam_lr1e-3_curves.png`.
+- Interpretation:
+  - The baseline VGG-A model reaches usable CIFAR-10 performance, with the best validation/test accuracy of 76.51%.
+  - The gap between final train accuracy (96.80%) and final validation/test accuracy (74.11%) indicates strong overfitting.
+  - Validation accuracy improves quickly through the first 8 to 12 epochs, then fluctuates while validation loss increases.
+  - This run is a useful no-BN baseline for later BN, regularization, activation, optimizer, and width comparisons.
+- Next action:
+  - Run `VGG_A_BatchNorm` with the same optimizer, learning rate, batch size, seed, and epoch count.
+  - Compare convergence speed, best validation/test accuracy, final overfitting gap, and loss-curve stability.
