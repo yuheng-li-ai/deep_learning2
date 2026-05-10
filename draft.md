@@ -333,3 +333,39 @@ Append each experiment using this format:
 - The final model-weight hosting location is not decided yet.
 - The final dataset link can use the official CIFAR-10 website or a net-disk mirror.
 - Training commands that need CUDA should run outside the normal sandbox because PyTorch CUDA is unavailable inside the sandbox.
+
+## 10. Implementation Log
+
+### 2026-05-10: Git and Environment Baseline
+
+- Commit: `f1809b3`.
+- Summary:
+  - Established the initial Git baseline and pushed it to GitHub.
+  - Converted this draft to English.
+  - Added `.gitignore` rules for local caches, dataset archives, model weights, and local ECC files.
+  - Verified that PyTorch CUDA works outside the sandbox.
+- Environment:
+  - Python 3.12.9.
+  - PyTorch 2.6.0+cu126.
+  - Torchvision 0.21.0+cu126.
+  - 3 x NVIDIA RTX A6000.
+  - Tiny CUDA matmul passed on `cuda:2`.
+
+### 2026-05-10: Phase 2 Starter-Code Readiness
+
+- Commit: pending.
+- Code changes:
+  - Fixed `PartialDataset` indexing.
+  - Fixed the VGG utility import path.
+  - Implemented `VGG_A_BatchNorm`.
+  - Added `codes/VGG_BatchNorm/train_cifar.py` as a manual training entry point.
+  - Added `tqdm` progress bars for epoch, train-batch, and validation-batch loops.
+  - Added lightweight `unittest` coverage for data wrapping, model forward passes, and training utility functions.
+  - Added `README.md` with test and manual training commands.
+- Verification:
+  - `python -m unittest discover -s tests`: passed.
+  - `python -m compileall codes/VGG_BatchNorm tests`: passed.
+- Training status:
+  - No formal training was run by the agent.
+  - Training is intended to be launched manually from the user's terminal.
+  - Recommended manual device argument: `--device cuda:2`, if GPU 2 is still free.

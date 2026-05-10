@@ -9,6 +9,10 @@ __pycache__/
 .DS_Store
 
 data/
+!codes/VGG_BatchNorm/data/
+!codes/VGG_BatchNorm/data/*.py
+codes/VGG_BatchNorm/data/cifar-10-*
+codes/VGG_BatchNorm/data/*.tar.gz
 *.tar.gz
 *.zip
 
