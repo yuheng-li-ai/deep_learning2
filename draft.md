@@ -433,3 +433,17 @@ Append each experiment using this format:
 - Next action:
   - Run `VGG_A_BatchNorm` with the same optimizer, learning rate, batch size, seed, and epoch count.
   - Compare convergence speed, best validation/test accuracy, final overfitting gap, and loss-curve stability.
+
+### 2026-05-10: Non-Training Comparison Tooling
+
+- Commit: pending.
+- Code changes:
+  - Added `codes/VGG_BatchNorm/plot_runs.py`.
+  - Added unit tests for run summarization and plot-file creation.
+  - Updated README with a reusable command for comparing saved `metrics.json` files.
+- Verification:
+  - Generated `reports/figures/vgg_a_adam_lr1e-3_summary.png` from the completed VGG-A baseline metrics.
+  - `python -m unittest discover -s tests`: passed.
+  - `python -m compileall codes/VGG_BatchNorm tests`: passed.
+- Purpose:
+  - Once the user manually trains `VGG_A_BatchNorm`, the saved metrics can be plotted against the no-BN baseline without modifying training code.

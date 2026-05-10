@@ -97,3 +97,20 @@ Each run writes:
 
 Model weights are ignored by Git and should later be uploaded to external
 storage for the final PDF report.
+
+## Plotting Runs
+
+Generate a single-run or multi-run comparison plot from saved `metrics.json`
+files:
+
+```bash
+python codes/VGG_BatchNorm/plot_runs.py \
+  --run vgg_a=reports/runs/vgg_a_adam_lr1e-3 \
+  --run vgg_a_bn=reports/runs/vgg_a_bn_adam_lr1e-3 \
+  --output reports/figures/vgg_a_vs_bn_adam_lr1e-3.png \
+  --title "VGG-A vs VGG-A-BN, Adam lr=1e-3"
+```
+
+The script prints a compact JSON summary for each run, including best epoch,
+best validation accuracy, best validation error, final training accuracy, and
+final validation accuracy.
