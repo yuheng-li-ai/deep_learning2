@@ -47,6 +47,8 @@ validation batches.
 Small smoke run:
 
 ```bash
+mkdir -p reports/runs
+
 python codes/VGG_BatchNorm/train_cifar.py \
   --model vgg_a_light \
   --device cuda:2 \
@@ -60,6 +62,8 @@ python codes/VGG_BatchNorm/train_cifar.py \
 Baseline VGG-A run:
 
 ```bash
+mkdir -p reports/runs
+
 python codes/VGG_BatchNorm/train_cifar.py \
   --model vgg_a \
   --device cuda:2 \
@@ -73,6 +77,8 @@ python codes/VGG_BatchNorm/train_cifar.py \
 VGG-A with BatchNorm run:
 
 ```bash
+mkdir -p reports/runs
+
 python codes/VGG_BatchNorm/train_cifar.py \
   --model vgg_a_bn \
   --device cuda:2 \

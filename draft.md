@@ -369,3 +369,15 @@ Append each experiment using this format:
   - No formal training was run by the agent.
   - Training is intended to be launched manually from the user's terminal.
   - Recommended manual device argument: `--device cuda:2`, if GPU 2 is still free.
+
+### 2026-05-10: Manual Training Command Fix
+
+- Commit: pending.
+- Issue:
+  - A manual `nohup` training command failed before Python started because shell redirection tried to create `reports/runs/vgg_a_adam_lr1e-3.log`, but the parent directory did not exist yet.
+- Fix:
+  - Added `reports/runs/.gitkeep` so the default run-log parent directory exists after clone.
+  - Updated README commands to create `reports/runs` before launching training.
+- Training status:
+  - The failed command did not run training.
+  - The corrected command can be relaunched manually by the user.
