@@ -436,7 +436,7 @@ Append each experiment using this format:
 
 ### 2026-05-10: Non-Training Comparison Tooling
 
-- Commit: pending.
+- Commit: `671a8f6`.
 - Code changes:
   - Added `codes/VGG_BatchNorm/plot_runs.py`.
   - Added unit tests for run summarization and plot-file creation.
@@ -447,3 +447,62 @@ Append each experiment using this format:
   - `python -m compileall codes/VGG_BatchNorm tests`: passed.
 - Purpose:
   - Once the user manually trains `VGG_A_BatchNorm`, the saved metrics can be plotted against the no-BN baseline without modifying training code.
+
+### Experiment 2026-05-12-01: VGG-A with BatchNorm, Adam
+
+- Commit before training: `671a8f6`.
+- Code state:
+  - Training entry point: `codes/VGG_BatchNorm/train_cifar.py`.
+  - Model: `VGG_A_BatchNorm`.
+  - Comparison tooling: `codes/VGG_BatchNorm/plot_runs.py`.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: Adam.
+  - Learning rate: 1e-3.
+  - Weight decay: 0.0.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+- Model size:
+  - Parameters: 9,756,426.
+  - Parameter increase over no-BN VGG-A: 5,504 parameters.
+- Runtime:
+  - Total recorded epoch time: 104.39 seconds.
+  - Epoch 1 took 7.52 seconds.
+  - Later epochs were approximately 5.0 to 5.3 seconds each.
+- Best result:
+  - Best validation/test accuracy: 0.8324.
+  - Best validation/test error: 0.1676.
+  - Best epoch: 12.
+  - Best checkpoint: `reports/runs/vgg_a_bn_adam_lr1e-3/best.pt`.
+- Final epoch:
+  - Train loss: 0.0416.
+  - Train accuracy: 0.9862.
+  - Validation/test loss: 0.9035.
+  - Validation/test accuracy: 0.8257.
+- Raw metrics:
+  - `reports/runs/vgg_a_bn_adam_lr1e-3/metrics.json`.
+  - `reports/runs/vgg_a_bn_adam_lr1e-3/metrics.csv`.
+- Figures:
+  - `reports/figures/vgg_a_bn_adam_lr1e-3_summary.png`.
+  - `reports/figures/vgg_a_vs_bn_adam_lr1e-3.png`.
+- Comparison with no-BN VGG-A:
+  - No-BN best validation/test accuracy: 0.7651 at epoch 18.
+  - BN best validation/test accuracy: 0.8324 at epoch 12.
+  - Absolute accuracy gain: 6.73 percentage points.
+  - Absolute test-error reduction: 6.73 percentage points.
+  - BN reaches strong validation accuracy earlier, improving convergence behavior under the same Adam learning rate and batch size.
+  - BN also keeps the final validation loss lower than the no-BN model: 0.9035 vs. 1.4421.
+- Interpretation:
+  - BatchNorm substantially improves both accuracy and convergence speed in this matched VGG-A setting.
+  - The no-BN model overfits strongly after the early/middle epochs, while the BN model reaches a higher best validation accuracy and ends with a much stronger final validation accuracy.
+  - The train-validation gap remains visible for BN, so BN is not enough by itself to remove overfitting; additional regularization or data augmentation should still be tested.
+- Next action:
+  - Run a parameter/width ablation such as `VGG_A_Light`.
+  - Run a regularization ablation such as `VGG_A_Dropout`.
+  - Run an optimizer comparison for `VGG_A_BatchNorm`, for example AdamW or SGD with momentum.
