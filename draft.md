@@ -674,7 +674,7 @@ Append each experiment using this format:
 
 ### 2026-05-12: Activation Variant Support
 
-- Commit: pending.
+- Commit: `9041dba`.
 - Code changes:
   - Added reusable activation construction in `codes/VGG_BatchNorm/models/vgg.py`.
   - Added `VGG_A_BatchNorm_LeakyReLU`.
@@ -690,4 +690,63 @@ Append each experiment using this format:
   - `python codes/VGG_BatchNorm/train_cifar.py --help` lists both new model choices.
 - Training status:
   - No activation-variant training was run by the agent.
-  - Recommended next manual run: `vgg_a_bn_leaky_relu` under the same Adam settings as the ReLU BN baseline.
+  - The user manually ran both activation-variant trainings after this code support was committed.
+
+### Experiment 2026-05-12-05: VGG-A-BN Activation Comparison
+
+- Commit before training: `9041dba`.
+- Code state:
+  - Training entry point: `codes/VGG_BatchNorm/train_cifar.py`.
+  - Baseline activation: ReLU in `VGG_A_BatchNorm`.
+  - Activation variants:
+    - `VGG_A_BatchNorm_LeakyReLU`.
+    - `VGG_A_BatchNorm_GELU`.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Shared configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: Adam.
+  - Learning rate: 1e-3.
+  - Weight decay: 0.0.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+- Model size:
+  - ReLU parameters: 9,756,426.
+  - LeakyReLU parameters: 9,756,426.
+  - GELU parameters: 9,756,426.
+- Runs:
+  - ReLU baseline: `reports/runs/vgg_a_bn_adam_lr1e-3`.
+  - LeakyReLU: `reports/runs/vgg_a_bn_leaky_relu_adam_lr1e-3`.
+  - GELU: `reports/runs/vgg_a_bn_gelu_adam_lr1e-3`.
+- Best results:
+  - ReLU best validation/test accuracy: 0.8324, error: 0.1676, best epoch: 12.
+  - LeakyReLU best validation/test accuracy: 0.8254, error: 0.1746, best epoch: 18.
+  - GELU best validation/test accuracy: 0.8396, error: 0.1604, best epoch: 19.
+- Final epoch results:
+  - ReLU final train accuracy: 0.9862, final validation/test loss: 0.9035, final validation/test accuracy: 0.8257.
+  - LeakyReLU final train accuracy: 0.9840, final validation/test loss: 0.8619, final validation/test accuracy: 0.8194.
+  - GELU final train accuracy: 0.9891, final validation/test loss: 0.7710, final validation/test accuracy: 0.8373.
+- Runtime:
+  - LeakyReLU total recorded epoch time: 99.21 seconds.
+  - GELU total recorded epoch time: 98.03 seconds.
+- Raw metrics:
+  - `reports/runs/vgg_a_bn_leaky_relu_adam_lr1e-3/metrics.json`.
+  - `reports/runs/vgg_a_bn_leaky_relu_adam_lr1e-3/metrics.csv`.
+  - `reports/runs/vgg_a_bn_gelu_adam_lr1e-3/metrics.json`.
+  - `reports/runs/vgg_a_bn_gelu_adam_lr1e-3/metrics.csv`.
+- Figures:
+  - `reports/figures/vgg_a_bn_leaky_relu_adam_lr1e-3_summary.png`.
+  - `reports/figures/vgg_a_bn_gelu_adam_lr1e-3_summary.png`.
+  - `reports/figures/vgg_a_bn_activation_comparison_adam_lr1e-3.png`.
+- Interpretation:
+  - GELU is the best activation in this comparison, improving the best validation/test accuracy by 0.72 percentage points over the ReLU BN baseline and by 1.42 percentage points over LeakyReLU.
+  - GELU also has the strongest final validation/test accuracy and lowest final validation/test loss, suggesting that the smoother activation is helpful in this setting.
+  - LeakyReLU does not improve peak accuracy over ReLU, although its final validation loss is lower than the ReLU baseline.
+  - This experiment satisfies the activation-function comparison requirement.
+- Next action:
+  - Implement loss-landscape logging for multiple learning rates with and without BatchNorm.
+  - Run the loss-landscape experiments manually from the terminal, then use their saved loss curves for the final report.
