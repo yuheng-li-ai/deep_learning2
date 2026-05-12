@@ -560,3 +560,60 @@ Append each experiment using this format:
 - Next action:
   - Run `VGG_A_Light` to satisfy a clear parameter/filter/neurons ablation.
   - Then run an optimizer comparison, preferably `VGG_A_BatchNorm` with AdamW or SGD with momentum.
+
+### Experiment 2026-05-12-03: VGG-A-Light Width/Parameter Ablation, Adam
+
+- Commit before training: `3af08ab`.
+- Code state:
+  - Training entry point: `codes/VGG_BatchNorm/train_cifar.py`.
+  - Model: `VGG_A_Light`.
+  - Architecture change: smaller convolutional width and a smaller classifier compared with full VGG-A.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: Adam.
+  - Learning rate: 1e-3.
+  - Weight decay: 0.0.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+- Model size:
+  - Parameters: 285,162.
+  - Relative size: about 2.92% of full VGG-A parameters.
+  - Parameter reduction: about 97.08% fewer parameters than full VGG-A.
+- Runtime:
+  - Total recorded epoch time: 56.06 seconds.
+  - Later epochs were approximately 2.7 to 2.9 seconds each.
+- Best result:
+  - Best validation/test accuracy: 0.7027.
+  - Best validation/test error: 0.2973.
+  - Best epoch: 9.
+  - Best checkpoint: `reports/runs/vgg_a_light_adam_lr1e-3/best.pt`.
+- Final epoch:
+  - Train loss: 0.2069.
+  - Train accuracy: 0.9271.
+  - Validation/test loss: 1.4801.
+  - Validation/test accuracy: 0.6818.
+- Raw metrics:
+  - `reports/runs/vgg_a_light_adam_lr1e-3/metrics.json`.
+  - `reports/runs/vgg_a_light_adam_lr1e-3/metrics.csv`.
+- Figures:
+  - `reports/figures/vgg_a_light_adam_lr1e-3_summary.png`.
+  - `reports/figures/vgg_a_variants_adam_lr1e-3.png`.
+- Comparison with full VGG-A variants:
+  - VGG-A-Light best validation/test accuracy: 0.7027.
+  - Full VGG-A best validation/test accuracy: 0.7651.
+  - VGG-A-BN best validation/test accuracy: 0.8324.
+  - VGG-A-Dropout best validation/test accuracy: 0.7419.
+  - VGG-A-Light is much smaller and faster, but loses 6.24 percentage points against full VGG-A and 12.97 percentage points against VGG-A-BN.
+- Interpretation:
+  - Reducing width and classifier size gives a large speed and parameter-count benefit, but the capacity loss is clearly visible on CIFAR-10 accuracy.
+  - The light model still overfits after its best epoch, so capacity reduction alone does not fully solve generalization.
+  - This experiment satisfies the filters/neurons ablation requirement and supports the report discussion about accuracy-parameter-speed trade-offs.
+- Next action:
+  - Run an optimizer comparison on the best current structure, `VGG_A_BatchNorm`, using AdamW or SGD with momentum.
+  - Then prepare loss-landscape experiments across multiple learning rates for with-BN vs without-BN.
