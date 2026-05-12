@@ -89,6 +89,38 @@ python codes/VGG_BatchNorm/train_cifar.py \
   --output-dir reports/runs/vgg_a_bn_adam_lr1e-3
 ```
 
+VGG-A with BatchNorm and LeakyReLU run:
+
+```bash
+mkdir -p reports/runs
+
+nohup python codes/VGG_BatchNorm/train_cifar.py \
+  --model vgg_a_bn_leaky_relu \
+  --device cuda:2 \
+  --epochs 20 \
+  --batch-size 128 \
+  --optimizer adam \
+  --lr 1e-3 \
+  --output-dir reports/runs/vgg_a_bn_leaky_relu_adam_lr1e-3 \
+  > reports/runs/vgg_a_bn_leaky_relu_adam_lr1e-3.log 2>&1 &
+```
+
+VGG-A with BatchNorm and GELU run:
+
+```bash
+mkdir -p reports/runs
+
+nohup python codes/VGG_BatchNorm/train_cifar.py \
+  --model vgg_a_bn_gelu \
+  --device cuda:2 \
+  --epochs 20 \
+  --batch-size 128 \
+  --optimizer adam \
+  --lr 1e-3 \
+  --output-dir reports/runs/vgg_a_bn_gelu_adam_lr1e-3 \
+  > reports/runs/vgg_a_bn_gelu_adam_lr1e-3.log 2>&1 &
+```
+
 Each run writes:
 
 - `metrics.json`

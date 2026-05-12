@@ -18,6 +18,16 @@ def get_number_of_parameters(model):
     return parameters_n
 
 
+def make_activation(name):
+    if name == "relu":
+        return nn.ReLU(True)
+    if name == "leaky_relu":
+        return nn.LeakyReLU(negative_slope=0.1, inplace=True)
+    if name == "gelu":
+        return nn.GELU()
+    raise ValueError(f"Unsupported activation: {name}")
+
+
 class VGG_A(nn.Module):
     """VGG_A model
 
@@ -83,55 +93,58 @@ class VGG_A(nn.Module):
 class VGG_A_BatchNorm(nn.Module):
     """VGG_A variant with BatchNorm2d after each convolution."""
 
-    def __init__(self, inp_ch=3, num_classes=10, init_weights=True):
+    activation_name = "relu"
+
+    def __init__(self, inp_ch=3, num_classes=10, init_weights=True, activation=None):
         super().__init__()
+        activation = activation or self.activation_name
 
         self.features = nn.Sequential(
             # stage 1
             nn.Conv2d(in_channels=inp_ch, out_channels=64, kernel_size=3, padding=1),
             nn.BatchNorm2d(64),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
             # stage 2
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
             nn.BatchNorm2d(128),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
             # stage 3
             nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1),
             nn.BatchNorm2d(256),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.Conv2d(in_channels=256, out_channels=256, kernel_size=3, padding=1),
             nn.BatchNorm2d(256),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
             # stage 4
             nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, padding=1),
             nn.BatchNorm2d(512),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1),
             nn.BatchNorm2d(512),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
             # stage 5
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1),
             nn.BatchNorm2d(512),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1),
             nn.BatchNorm2d(512),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
         self.classifier = nn.Sequential(
             nn.Linear(512 * 1 * 1, 512),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.Linear(512, 512),
-            nn.ReLU(True),
+            make_activation(activation),
             nn.Linear(512, num_classes),
         )
 
@@ -146,6 +159,18 @@ class VGG_A_BatchNorm(nn.Module):
     def _init_weights(self):
         for m in self.modules():
             init_weights_(m)
+
+
+class VGG_A_BatchNorm_LeakyReLU(VGG_A_BatchNorm):
+    """VGG_A_BatchNorm variant using LeakyReLU activations."""
+
+    activation_name = "leaky_relu"
+
+
+class VGG_A_BatchNorm_GELU(VGG_A_BatchNorm):
+    """VGG_A_BatchNorm variant using GELU activations."""
+
+    activation_name = "gelu"
 
 
 class VGG_A_Light(nn.Module):
@@ -254,5 +279,7 @@ class VGG_A_Dropout(nn.Module):
 if __name__ == '__main__':
     print(get_number_of_parameters(VGG_A()))
     print(get_number_of_parameters(VGG_A_BatchNorm()))
+    print(get_number_of_parameters(VGG_A_BatchNorm_LeakyReLU()))
+    print(get_number_of_parameters(VGG_A_BatchNorm_GELU()))
     print(get_number_of_parameters(VGG_A_Light()))
     print(get_number_of_parameters(VGG_A_Dropout()))

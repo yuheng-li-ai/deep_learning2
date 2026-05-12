@@ -671,3 +671,23 @@ Append each experiment using this format:
 - Next action:
   - Add activation-function variants so the report can explicitly compare activations.
   - Prepare loss-landscape experiments across learning rates for VGG-A with and without BN.
+
+### 2026-05-12: Activation Variant Support
+
+- Commit: pending.
+- Code changes:
+  - Added reusable activation construction in `codes/VGG_BatchNorm/models/vgg.py`.
+  - Added `VGG_A_BatchNorm_LeakyReLU`.
+  - Added `VGG_A_BatchNorm_GELU`.
+  - Added training registry keys:
+    - `vgg_a_bn_leaky_relu`.
+    - `vgg_a_bn_gelu`.
+  - Added unit tests to verify both activation variants can run a forward pass and contain the intended activation layer.
+  - Added README commands for manual LeakyReLU and GELU training.
+- Verification:
+  - `python -m unittest discover -s tests`: passed.
+  - `python -m compileall codes/VGG_BatchNorm tests`: passed.
+  - `python codes/VGG_BatchNorm/train_cifar.py --help` lists both new model choices.
+- Training status:
+  - No activation-variant training was run by the agent.
+  - Recommended next manual run: `vgg_a_bn_leaky_relu` under the same Adam settings as the ReLU BN baseline.

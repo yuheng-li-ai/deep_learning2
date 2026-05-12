@@ -14,6 +14,8 @@ from data.loaders import get_cifar_loader
 from models.vgg import (
     VGG_A,
     VGG_A_BatchNorm,
+    VGG_A_BatchNorm_GELU,
+    VGG_A_BatchNorm_LeakyReLU,
     VGG_A_Dropout,
     VGG_A_Light,
     get_number_of_parameters,
@@ -23,6 +25,8 @@ from models.vgg import (
 MODEL_REGISTRY = {
     "vgg_a": VGG_A,
     "vgg_a_bn": VGG_A_BatchNorm,
+    "vgg_a_bn_leaky_relu": VGG_A_BatchNorm_LeakyReLU,
+    "vgg_a_bn_gelu": VGG_A_BatchNorm_GELU,
     "vgg_a_dropout": VGG_A_Dropout,
     "vgg_a_light": VGG_A_Light,
 }

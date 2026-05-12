@@ -11,7 +11,13 @@ VGG_ROOT = PROJECT_ROOT / "codes" / "VGG_BatchNorm"
 sys.path.insert(0, str(VGG_ROOT))
 
 from data.loaders import PartialDataset
-from models.vgg import VGG_A, VGG_A_BatchNorm, get_number_of_parameters
+from models.vgg import (
+    VGG_A,
+    VGG_A_BatchNorm,
+    VGG_A_BatchNorm_GELU,
+    VGG_A_BatchNorm_LeakyReLU,
+    get_number_of_parameters,
+)
 
 
 class ToyDataset(Dataset):
@@ -57,6 +63,30 @@ class ModelTests(unittest.TestCase):
 
         self.assertEqual(tuple(logits.shape), (2, 10))
         self.assertGreaterEqual(len(batchnorm_layers), 1)
+
+    def test_vgg_a_batchnorm_leaky_relu_forward_shape_and_layers(self):
+        model = VGG_A_BatchNorm_LeakyReLU(init_weights=False)
+        x = torch.randn(2, 3, 32, 32)
+
+        logits = model(x)
+        activation_layers = [
+            module for module in model.modules() if isinstance(module, torch.nn.LeakyReLU)
+        ]
+
+        self.assertEqual(tuple(logits.shape), (2, 10))
+        self.assertGreaterEqual(len(activation_layers), 1)
+
+    def test_vgg_a_batchnorm_gelu_forward_shape_and_layers(self):
+        model = VGG_A_BatchNorm_GELU(init_weights=False)
+        x = torch.randn(2, 3, 32, 32)
+
+        logits = model(x)
+        activation_layers = [
+            module for module in model.modules() if isinstance(module, torch.nn.GELU)
+        ]
+
+        self.assertEqual(tuple(logits.shape), (2, 10))
+        self.assertGreaterEqual(len(activation_layers), 1)
 
 
 if __name__ == "__main__":
