@@ -1,4 +1,5 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -10,7 +11,7 @@ VGG_ROOT = PROJECT_ROOT / "codes" / "VGG_BatchNorm"
 sys.path.insert(0, str(VGG_ROOT))
 
 from models.vgg import VGG_A_Light
-from train_cifar import build_optimizer, resolve_device
+from train_cifar import build_optimizer, resolve_device, save_metrics
 
 
 class TrainCifarTests(unittest.TestCase):
@@ -29,6 +30,33 @@ class TrainCifarTests(unittest.TestCase):
                 )
 
                 self.assertIsInstance(optimizer, torch.optim.Optimizer)
+
+    def test_save_metrics_writes_step_losses_when_provided(self):
+        metrics = {
+            "epochs": [
+                {
+                    "epoch": 1,
+                    "train_loss": 1.0,
+                    "train_accuracy": 0.5,
+                    "val_loss": 1.1,
+                    "val_accuracy": 0.4,
+                    "elapsed_seconds": 0.1,
+                }
+            ]
+        }
+        step_losses = [
+            {"step": 1, "epoch": 1, "batch": 1, "train_loss": 2.0},
+            {"step": 2, "epoch": 1, "batch": 2, "train_loss": 1.5},
+        ]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+
+            save_metrics(output_dir, metrics, step_losses=step_losses)
+
+            step_loss_path = output_dir / "step_losses.csv"
+            self.assertTrue(step_loss_path.exists())
+            self.assertIn("step,epoch,batch,train_loss", step_loss_path.read_text())
 
 
 if __name__ == "__main__":

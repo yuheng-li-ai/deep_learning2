@@ -750,3 +750,44 @@ Append each experiment using this format:
 - Next action:
   - Implement loss-landscape logging for multiple learning rates with and without BatchNorm.
   - Run the loss-landscape experiments manually from the terminal, then use their saved loss curves for the final report.
+
+### 2026-05-12: Loss-Landscape Logging Support
+
+- Commit: current change set; final hash is recorded in Git history.
+- Purpose:
+  - Prepare the required BatchNorm optimization-landscape experiment without running formal training inside the agent session.
+  - Save per-training-step loss values so the max/min loss envelope can be computed across learning rates.
+- Code changes:
+  - Added `--record-step-losses` to `codes/VGG_BatchNorm/train_cifar.py`.
+  - When enabled, training writes `step_losses.csv` with columns:
+    - `step`.
+    - `epoch`.
+    - `batch`.
+    - `train_loss`.
+  - Added `codes/VGG_BatchNorm/plot_loss_landscape.py`.
+  - The plotting script accepts multiple `GROUP:NAME=PATH` runs, computes per-step `min_curve`, `max_curve`, and `mean_curve` for each group, and fills the min-max region with `matplotlib.pyplot.fill_between`.
+  - Added unit tests for step-loss persistence and envelope computation.
+- Planned manual runs:
+  - Models:
+    - `vgg_a` for no BatchNorm.
+    - `vgg_a_bn` for BatchNorm.
+  - Learning rates:
+    - `1e-4`.
+    - `5e-4`.
+    - `1e-3`.
+    - `2e-3`.
+  - Shared settings:
+    - Device: `cuda:2`.
+    - Epochs: 20.
+    - Batch size: 128.
+    - Optimizer: Adam.
+    - Weight decay: 0.0.
+    - Seed: 2020.
+    - Full CIFAR-10 train/test splits.
+- Planned output:
+  - Per-run directories under `reports/runs/loss_landscape/`.
+  - Each run will include `metrics.json`, `metrics.csv`, `step_losses.csv`, and local ignored `best.pt`.
+  - Final plot: `reports/figures/vgg_a_loss_landscape_bn_vs_no_bn.png`.
+  - Final summary: `reports/figures/vgg_a_loss_landscape_bn_vs_no_bn_summary.json`.
+- Manual command location:
+  - The exact `nohup` command and final plotting command are documented in `README.md`.

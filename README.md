@@ -127,6 +127,10 @@ Each run writes:
 - `metrics.csv`
 - `best.pt`
 
+When `--record-step-losses` is set, the run also writes:
+
+- `step_losses.csv`
+
 Model weights are ignored by Git and should later be uploaded to external
 storage for the final PDF report.
 
@@ -146,3 +150,48 @@ python codes/VGG_BatchNorm/plot_runs.py \
 The script prints a compact JSON summary for each run, including best epoch,
 best validation accuracy, best validation error, final training accuracy, and
 final validation accuracy.
+
+## Loss Landscape Runs
+
+The loss-landscape requirement needs per-training-step losses across several
+learning rates, with and without BatchNorm. Run these manually from the
+terminal; this launches the eight runs sequentially inside one `nohup` job:
+
+```bash
+mkdir -p reports/runs/loss_landscape
+
+nohup sh -c '
+for model in vgg_a vgg_a_bn; do
+  for lr in 1e-4 5e-4 1e-3 2e-3; do
+    out=reports/runs/loss_landscape/${model}_adam_lr${lr}_steps
+    python codes/VGG_BatchNorm/train_cifar.py \
+      --model ${model} \
+      --device cuda:2 \
+      --epochs 20 \
+      --batch-size 128 \
+      --optimizer adam \
+      --lr ${lr} \
+      --output-dir ${out} \
+      --record-step-losses \
+      > ${out}.log 2>&1
+  done
+done
+' > reports/runs/loss_landscape/all.log 2>&1 &
+```
+
+After all eight runs finish, generate the BN vs. no-BN loss envelope plot:
+
+```bash
+python codes/VGG_BatchNorm/plot_loss_landscape.py \
+  --run no_bn:1e-4=reports/runs/loss_landscape/vgg_a_adam_lr1e-4_steps \
+  --run no_bn:5e-4=reports/runs/loss_landscape/vgg_a_adam_lr5e-4_steps \
+  --run no_bn:1e-3=reports/runs/loss_landscape/vgg_a_adam_lr1e-3_steps \
+  --run no_bn:2e-3=reports/runs/loss_landscape/vgg_a_adam_lr2e-3_steps \
+  --run bn:1e-4=reports/runs/loss_landscape/vgg_a_bn_adam_lr1e-4_steps \
+  --run bn:5e-4=reports/runs/loss_landscape/vgg_a_bn_adam_lr5e-4_steps \
+  --run bn:1e-3=reports/runs/loss_landscape/vgg_a_bn_adam_lr1e-3_steps \
+  --run bn:2e-3=reports/runs/loss_landscape/vgg_a_bn_adam_lr2e-3_steps \
+  --output reports/figures/vgg_a_loss_landscape_bn_vs_no_bn.png \
+  --summary reports/figures/vgg_a_loss_landscape_bn_vs_no_bn_summary.json \
+  --title "VGG-A Loss Landscape: BatchNorm vs No BatchNorm"
+```

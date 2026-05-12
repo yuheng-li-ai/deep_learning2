@@ -47,6 +47,11 @@ def parse_args():
     parser.add_argument("--seed", type=int, default=2020)
     parser.add_argument("--n-train-items", type=int, default=-1)
     parser.add_argument("--n-val-items", type=int, default=-1)
+    parser.add_argument(
+        "--record-step-losses",
+        action="store_true",
+        help="Save per-training-step losses to step_losses.csv for landscape plots.",
+    )
     return parser.parse_args()
 
 
@@ -113,7 +118,16 @@ def evaluate(model, data_loader, criterion, device, desc):
     }
 
 
-def train_one_epoch(model, data_loader, criterion, optimizer, device, epoch, epochs):
+def train_one_epoch(
+    model,
+    data_loader,
+    criterion,
+    optimizer,
+    device,
+    epoch,
+    epochs,
+    step_losses=None,
+):
     model.train()
     total_loss = 0.0
     total_correct = 0
@@ -125,7 +139,7 @@ def train_one_epoch(model, data_loader, criterion, optimizer, device, epoch, epo
         unit="batch",
         leave=False,
     )
-    for x, y in progress:
+    for batch_index, (x, y) in enumerate(progress, start=1):
         x = x.to(device, non_blocking=True)
         y = y.to(device, non_blocking=True)
 
@@ -141,6 +155,16 @@ def train_one_epoch(model, data_loader, criterion, optimizer, device, epoch, epo
         total_correct += (predictions == y).sum().item()
         total_examples += batch_size
 
+        if step_losses is not None:
+            step_losses.append(
+                {
+                    "step": len(step_losses) + 1,
+                    "epoch": epoch,
+                    "batch": batch_index,
+                    "train_loss": loss.item(),
+                }
+            )
+
         progress.set_postfix(
             loss=f"{total_loss / total_examples:.4f}",
             acc=f"{total_correct / total_examples:.4f}",
@@ -152,7 +176,7 @@ def train_one_epoch(model, data_loader, criterion, optimizer, device, epoch, epo
     }
 
 
-def save_metrics(output_dir, metrics):
+def save_metrics(output_dir, metrics, step_losses=None):
     json_path = output_dir / "metrics.json"
     csv_path = output_dir / "metrics.csv"
 
@@ -174,6 +198,17 @@ def save_metrics(output_dir, metrics):
         writer.writeheader()
         for row in metrics["epochs"]:
             writer.writerow(row)
+
+    if step_losses is not None:
+        step_loss_path = output_dir / "step_losses.csv"
+        with step_loss_path.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=["step", "epoch", "batch", "train_loss"],
+            )
+            writer.writeheader()
+            for row in step_losses:
+                writer.writerow(row)
 
 
 def run_training(args):
@@ -213,12 +248,22 @@ def run_training(args):
         "best_epoch": 0,
         "best_checkpoint": str(output_dir / "best.pt"),
     }
+    step_losses = [] if args.record_step_losses else None
+    if step_losses is not None:
+        metrics["step_losses_file"] = str(output_dir / "step_losses.csv")
 
     epoch_bar = tqdm(range(1, args.epochs + 1), desc="epochs", unit="epoch")
     for epoch in epoch_bar:
         start = time.perf_counter()
         train_metrics = train_one_epoch(
-            model, train_loader, criterion, optimizer, device, epoch, args.epochs
+            model,
+            train_loader,
+            criterion,
+            optimizer,
+            device,
+            epoch,
+            args.epochs,
+            step_losses=step_losses,
         )
         val_metrics = evaluate(
             model, val_loader, criterion, device, desc=f"epoch {epoch}/{args.epochs} val"
@@ -248,7 +293,7 @@ def run_training(args):
                 output_dir / "best.pt",
             )
 
-        save_metrics(output_dir, metrics)
+        save_metrics(output_dir, metrics, step_losses=step_losses)
         epoch_bar.set_postfix(
             train_acc=f"{train_metrics['accuracy']:.4f}",
             val_acc=f"{val_metrics['accuracy']:.4f}",
