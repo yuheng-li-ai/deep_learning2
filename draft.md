@@ -617,3 +617,57 @@ Append each experiment using this format:
 - Next action:
   - Run an optimizer comparison on the best current structure, `VGG_A_BatchNorm`, using AdamW or SGD with momentum.
   - Then prepare loss-landscape experiments across multiple learning rates for with-BN vs without-BN.
+
+### Experiment 2026-05-12-04: VGG-A-BN Optimizer Comparison with AdamW
+
+- Commit before training: `2689627`.
+- Code state:
+  - Training entry point: `codes/VGG_BatchNorm/train_cifar.py`.
+  - Model: `VGG_A_BatchNorm`.
+  - Optimizer under test: AdamW with decoupled weight decay.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: AdamW.
+  - Learning rate: 1e-3.
+  - Weight decay: 1e-4.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+- Model size:
+  - Parameters: 9,756,426.
+- Runtime:
+  - Total recorded epoch time: 102.32 seconds.
+  - Later epochs were approximately 5.0 to 5.2 seconds each.
+- Best result:
+  - Best validation/test accuracy: 0.8302.
+  - Best validation/test error: 0.1698.
+  - Best epoch: 20.
+  - Best checkpoint: `reports/runs/vgg_a_bn_adamw_lr1e-3_wd1e-4/best.pt`.
+- Final epoch:
+  - Train loss: 0.0414.
+  - Train accuracy: 0.9871.
+  - Validation/test loss: 0.8285.
+  - Validation/test accuracy: 0.8302.
+- Raw metrics:
+  - `reports/runs/vgg_a_bn_adamw_lr1e-3_wd1e-4/metrics.json`.
+  - `reports/runs/vgg_a_bn_adamw_lr1e-3_wd1e-4/metrics.csv`.
+- Figures:
+  - `reports/figures/vgg_a_bn_adamw_lr1e-3_wd1e-4_summary.png`.
+  - `reports/figures/vgg_a_bn_optimizer_adam_vs_adamw.png`.
+- Comparison with VGG-A-BN + Adam:
+  - Adam best validation/test accuracy: 0.8324 at epoch 12.
+  - AdamW best validation/test accuracy: 0.8302 at epoch 20.
+  - AdamW is 0.22 percentage points lower in best accuracy, but its final validation/test accuracy is higher: 0.8302 vs. 0.8257.
+  - AdamW also has lower final validation loss: 0.8285 vs. 0.9035.
+- Interpretation:
+  - Adam and AdamW perform very similarly for VGG-A-BN under this 20-epoch setting.
+  - Adam reaches a slightly higher peak earlier, while AdamW with weight decay gives a smoother final state and the best value at the final epoch.
+  - This experiment satisfies the optimizer and regularization comparison requirement.
+- Next action:
+  - Add activation-function variants so the report can explicitly compare activations.
+  - Prepare loss-landscape experiments across learning rates for VGG-A with and without BN.
