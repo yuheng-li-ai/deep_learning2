@@ -506,3 +506,57 @@ Append each experiment using this format:
   - Run a parameter/width ablation such as `VGG_A_Light`.
   - Run a regularization ablation such as `VGG_A_Dropout`.
   - Run an optimizer comparison for `VGG_A_BatchNorm`, for example AdamW or SGD with momentum.
+
+### Experiment 2026-05-12-02: VGG-A with Dropout, Adam
+
+- Commit before training: `01a3436`.
+- Code state:
+  - Training entry point: `codes/VGG_BatchNorm/train_cifar.py`.
+  - Model: `VGG_A_Dropout`.
+  - Dropout placement: classifier dropout before the first two linear layers.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: Adam.
+  - Learning rate: 1e-3.
+  - Weight decay: 0.0.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+- Model size:
+  - Parameters: 9,750,922.
+- Runtime:
+  - Total recorded epoch time: 89.38 seconds.
+  - Later epochs were approximately 4.3 to 4.7 seconds each.
+- Best result:
+  - Best validation/test accuracy: 0.7419.
+  - Best validation/test error: 0.2581.
+  - Best epoch: 12.
+  - Best checkpoint: `reports/runs/vgg_a_dropout_adam_lr1e-3/best.pt`.
+- Final epoch:
+  - Train loss: 0.1410.
+  - Train accuracy: 0.9571.
+  - Validation/test loss: 1.3755.
+  - Validation/test accuracy: 0.7348.
+- Raw metrics:
+  - `reports/runs/vgg_a_dropout_adam_lr1e-3/metrics.json`.
+  - `reports/runs/vgg_a_dropout_adam_lr1e-3/metrics.csv`.
+- Figures:
+  - `reports/figures/vgg_a_dropout_adam_lr1e-3_summary.png`.
+  - `reports/figures/vgg_a_bn_dropout_adam_lr1e-3.png`.
+- Comparison with structural variants:
+  - VGG-A best validation/test accuracy: 0.7651.
+  - VGG-A-BN best validation/test accuracy: 0.8324.
+  - VGG-A-Dropout best validation/test accuracy: 0.7419.
+  - Dropout under this configuration is 2.32 percentage points below the no-BN VGG-A baseline and 9.05 percentage points below the BN variant.
+- Interpretation:
+  - Classifier-only Dropout with the default probability does not improve this VGG-A training setup.
+  - It slightly reduces final train accuracy compared with no-Dropout VGG-A, but it does not raise validation accuracy.
+  - This suggests that the main bottleneck in this configuration is not solved by classifier Dropout alone. BN gives a much stronger gain under the same optimizer, learning rate, seed, and epoch budget.
+- Next action:
+  - Run `VGG_A_Light` to satisfy a clear parameter/filter/neurons ablation.
+  - Then run an optimizer comparison, preferably `VGG_A_BatchNorm` with AdamW or SGD with momentum.
