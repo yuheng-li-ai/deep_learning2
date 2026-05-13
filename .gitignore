@@ -27,3 +27,8 @@ checkpoints/
 
 *.log
 *.tmp
+*.aux
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
