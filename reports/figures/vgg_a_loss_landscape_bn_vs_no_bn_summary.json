@@ -1,0 +1,32 @@
+[
+  {
+    "group": "no_bn",
+    "runs": [
+      "1e-4",
+      "5e-4",
+      "1e-3",
+      "2e-3"
+    ],
+    "steps": 7820,
+    "mean_envelope_width": 0.40844085993607887,
+    "max_envelope_width": 2.79036545753479,
+    "final_min_loss": 0.057625602930784225,
+    "final_max_loss": 0.276407927274704,
+    "final_mean_loss": 0.14775232132524252
+  },
+  {
+    "group": "bn",
+    "runs": [
+      "1e-4",
+      "5e-4",
+      "1e-3",
+      "2e-3"
+    ],
+    "steps": 7820,
+    "mean_envelope_width": 0.2146968843846801,
+    "max_envelope_width": 3.5586788654327393,
+    "final_min_loss": 0.030604803934693336,
+    "final_max_loss": 0.055141329765319824,
+    "final_mean_loss": 0.038367030676454306
+  }
+]

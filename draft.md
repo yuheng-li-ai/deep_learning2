@@ -791,3 +791,72 @@ Append each experiment using this format:
   - Final summary: `reports/figures/vgg_a_loss_landscape_bn_vs_no_bn_summary.json`.
 - Manual command location:
   - The exact `nohup` command and final plotting command are documented in `README.md`.
+
+### Experiment 2026-05-13-06: Loss Landscape Across Learning Rates
+
+- Commit before training: `6bf2657`.
+- Purpose:
+  - Analyze whether BatchNorm reduces the variation of the training loss across different learning-rate step sizes.
+  - This directly addresses the project requirement to compare BN and no-BN loss landscapes using per-step loss curves.
+- Models:
+  - No BatchNorm: `VGG_A`.
+  - BatchNorm: `VGG_A_BatchNorm`.
+- Dataset:
+  - CIFAR-10 train split and test split loaded by `torchvision.datasets.CIFAR10`.
+  - `n_train_items = -1`, `n_val_items = -1`, so the full train/test splits were used.
+- Shared configuration:
+  - Device: `cuda:2`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Optimizer: Adam.
+  - Weight decay: 0.0.
+  - Loss: CrossEntropyLoss.
+  - Seed: 2020.
+  - Data preprocessing: ToTensor and Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]).
+  - Step-loss logging: enabled with `--record-step-losses`.
+- Learning rates:
+  - `1e-4`.
+  - `5e-4`.
+  - `1e-3`.
+  - `2e-3`.
+- Completion check:
+  - All 8 runs finished.
+  - Each run contains 20 epoch records and 7,820 per-step loss records.
+- No-BN results:
+  - `1e-4`: best accuracy 0.7659 at epoch 17; final accuracy 0.7526; final validation loss 1.3084; total epoch time 88.22 seconds.
+  - `5e-4`: best accuracy 0.7840 at epoch 14; final accuracy 0.7801; final validation loss 1.2380; total epoch time 88.40 seconds.
+  - `1e-3`: best accuracy 0.7651 at epoch 18; final accuracy 0.7411; final validation loss 1.4421; total epoch time 88.70 seconds.
+  - `2e-3`: best accuracy 0.7289 at epoch 16; final accuracy 0.7179; final validation loss 1.1336; total epoch time 88.68 seconds.
+- BN results:
+  - `1e-4`: best accuracy 0.7453 at epoch 18; final accuracy 0.7203; final validation loss 1.6119; total epoch time 101.69 seconds.
+  - `5e-4`: best accuracy 0.8244 at epoch 20; final accuracy 0.8244; final validation loss 0.8311; total epoch time 101.87 seconds.
+  - `1e-3`: best accuracy 0.8324 at epoch 12; final accuracy 0.8257; final validation loss 0.9035; total epoch time 101.46 seconds.
+  - `2e-3`: best accuracy 0.8305 at epoch 16; final accuracy 0.8192; final validation loss 0.8693; total epoch time 100.90 seconds.
+- Envelope summary:
+  - No-BN mean envelope width: 0.4084.
+  - BN mean envelope width: 0.2147.
+  - No-BN final loss range: 0.0576 to 0.2764.
+  - BN final loss range: 0.0306 to 0.0551.
+  - No-BN maximum envelope width: 2.7904.
+  - BN maximum envelope width: 3.5587.
+- Raw metrics and step losses:
+  - `reports/runs/loss_landscape/vgg_a_adam_lr1e-4_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_adam_lr5e-4_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_adam_lr1e-3_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_adam_lr2e-3_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_bn_adam_lr1e-4_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_bn_adam_lr5e-4_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_bn_adam_lr1e-3_steps/`.
+  - `reports/runs/loss_landscape/vgg_a_bn_adam_lr2e-3_steps/`.
+- Figures and summaries:
+  - `reports/figures/vgg_a_loss_landscape_bn_vs_no_bn.png`.
+  - `reports/figures/vgg_a_loss_landscape_bn_vs_no_bn_summary.json`.
+- Interpretation:
+  - BatchNorm narrows the average per-step loss envelope substantially: 0.2147 vs. 0.4084, about a 47.4% reduction relative to the no-BN envelope.
+  - The final loss range is also much narrower with BN: 0.0245 vs. 0.2188 for no-BN.
+  - The largest instantaneous envelope width is higher for BN, likely because the very small learning rate `1e-4` converges slowly for the BN model while the larger learning rates improve quickly; this creates a transient spread early in training.
+  - Despite that transient maximum, the average and final envelopes support the conclusion that BN makes optimization less sensitive to the tested learning-rate choices after the early phase.
+  - The best BN runs at `1e-3` and `2e-3` both reach about 83% validation accuracy, while the no-BN model degrades at `2e-3`; this further supports the claim that BN improves optimization stability at larger step sizes.
+- Next action:
+  - Commit the loss-landscape metrics, step losses, figure, summary, and updated draft.
+  - Use this section as the evidence base for the final LaTeX report's BN optimization analysis.
