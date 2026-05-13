@@ -863,7 +863,7 @@ Append each experiment using this format:
 
 ### 2026-05-13: Local 3D Loss-Surface Visualization
 
-- Commit: pending.
+- Commit: `d1734cf feat: add 3d loss surface visualization`.
 - Purpose:
   - Add an intuitive 3D visualization comparing the naive VGG-A checkpoint and the BatchNorm VGG-A checkpoint.
   - This is a qualitative local surface plot, not the same measurement as the learning-rate envelope experiment above.
@@ -898,3 +898,35 @@ Append each experiment using this format:
   - The center loss is lower for the BN checkpoint on the sampled validation subset, matching the stronger validation performance observed in the main experiments.
   - Because the plotted directions are random and the subset is small, the 3D surface should be presented as a qualitative illustration rather than a definitive sharpness metric.
   - The earlier learning-rate envelope remains the stronger evidence for reduced step-size sensitivity.
+
+### 2026-05-13: ModelScope Checkpoint Packaging
+
+- GitHub commit for the local model-card draft: `49bb97c docs: add modelscope model card`.
+- GitHub commit for the report link update: `1952fb3 docs: add modelscope weights link to report`.
+- ModelScope repository:
+  - Summary page: `https://www.modelscope.cn/models/yuhengli/deep-learning2-final-model/summary`.
+  - Files page: `https://www.modelscope.cn/models/yuhengli/deep-learning2-final-model/files`.
+- Uploaded final selected model:
+  - `final/vgg_a_bn_gelu_adam_lr1e-3_best.pt`.
+  - `final/vgg_a_bn_gelu_adam_lr1e-3_metrics.json`.
+- Uploaded ablation checkpoints:
+  - `ablations/vgg_a_adam_lr1e-3_best.pt`.
+  - `ablations/vgg_a_bn_adam_lr1e-3_best.pt`.
+  - `ablations/vgg_a_dropout_adam_lr1e-3_best.pt`.
+  - `ablations/vgg_a_light_adam_lr1e-3_best.pt`.
+  - `ablations/vgg_a_bn_adamw_lr1e-3_wd1e-4_best.pt`.
+  - `ablations/vgg_a_bn_leaky_relu_adam_lr1e-3_best.pt`.
+  - Matching `*_metrics.json` files were uploaded for every ablation checkpoint.
+- Excluded files:
+  - Loss-landscape learning-rate sweep checkpoints were not uploaded because they are auxiliary trajectory-analysis checkpoints.
+  - Their metrics, step-loss records, figures, and scripts remain in the GitHub repository.
+- Remote cleanup:
+  - The first upload placed a duplicate final checkpoint and metrics file at the ModelScope repository root.
+  - A clean ModelScope Git clone was used to remove those root-level duplicates.
+  - ModelScope cleanup commit: `52c44c4 Remove duplicate root checkpoint files`.
+- Verification:
+  - The final ModelScope file tree contains only `final/`, `ablations/`, `README.md`, `configuration.json`, and `.gitattributes`.
+  - No root-level checkpoint duplicate remains.
+- Interpretation:
+  - The ModelScope upload now separates the report's final model from auxiliary experimental checkpoints.
+  - The organization makes the final deliverable unambiguous while still preserving the major ablation evidence needed to reproduce the report tables.

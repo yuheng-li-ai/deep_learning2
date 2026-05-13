@@ -14,20 +14,22 @@ frameworks:
 
 # Deep Learning Project 2 Final Model
 
-This repository contains the final trained checkpoint for the Neural Network and Deep Learning Project 2 CIFAR-10 classification report.
+This repository contains the trained checkpoints for the Neural Network and Deep Learning Project 2 CIFAR-10 classification report. The final selected model is stored separately from the auxiliary ablation checkpoints.
 
-## Model
+## Final Selected Model
 
-The uploaded checkpoint is the best-performing model from the experiment suite:
+The final model used for the report conclusion is:
 
 - Architecture: VGG-A with BatchNorm and GELU activations
+- File: `final/vgg_a_bn_gelu_adam_lr1e-3_best.pt`
+- Metrics: `final/vgg_a_bn_gelu_adam_lr1e-3_metrics.json`
 - Dataset: CIFAR-10
 - Input size: 32 x 32 RGB images
 - Number of classes: 10
 - Parameters: 9,756,426
 - Framework: PyTorch
 
-## Training Configuration
+## Final Model Training Configuration
 
 - Epochs: 20
 - Batch size: 128
@@ -40,7 +42,7 @@ The uploaded checkpoint is the best-performing model from the experiment suite:
 - Training split: full CIFAR-10 training split
 - Evaluation split: full CIFAR-10 test split
 
-## Result
+## Final Model Result
 
 - Best test accuracy: 0.8396
 - Best test error: 0.1604
@@ -48,12 +50,22 @@ The uploaded checkpoint is the best-performing model from the experiment suite:
 - Final test accuracy: 0.8373
 - Final test loss: 0.7710
 
-## Files
+## Ablation Checkpoints
 
-- `vgg_a_bn_gelu_adam_lr1e-3_best.pt`: trained PyTorch checkpoint.
-- `vgg_a_bn_gelu_adam_lr1e-3_metrics.json`: full per-epoch metrics and training configuration.
+The `ablations/` directory contains auxiliary checkpoints used for the experimental comparisons in the report:
 
-## Loading the Checkpoint
+- `vgg_a_adam_lr1e-3_best.pt`: plain VGG-A baseline.
+- `vgg_a_bn_adam_lr1e-3_best.pt`: VGG-A with BatchNorm and ReLU.
+- `vgg_a_dropout_adam_lr1e-3_best.pt`: VGG-A with classifier Dropout.
+- `vgg_a_light_adam_lr1e-3_best.pt`: reduced-width VGG-A-Light.
+- `vgg_a_bn_adamw_lr1e-3_wd1e-4_best.pt`: VGG-A-BN trained with AdamW and weight decay.
+- `vgg_a_bn_leaky_relu_adam_lr1e-3_best.pt`: VGG-A-BN with LeakyReLU.
+
+Each ablation checkpoint has a matching `*_metrics.json` file with the training configuration and per-epoch metrics.
+
+Loss-landscape learning-rate sweep checkpoints are not uploaded because they are auxiliary trajectory-analysis runs. Their metrics, step-loss curves, figures, and source code are available in the GitHub repository.
+
+## Loading the Final Checkpoint
 
 The checkpoint stores a dictionary with `model_state_dict`, `config`, `epoch`, and `val_accuracy`.
 
@@ -61,7 +73,10 @@ The checkpoint stores a dictionary with `model_state_dict`, `config`, `epoch`, a
 import torch
 from codes.VGG_BatchNorm.models.vgg import VGG_A_BatchNorm_GELU
 
-checkpoint = torch.load("vgg_a_bn_gelu_adam_lr1e-3_best.pt", map_location="cpu")
+checkpoint = torch.load(
+    "final/vgg_a_bn_gelu_adam_lr1e-3_best.pt",
+    map_location="cpu",
+)
 model = VGG_A_BatchNorm_GELU()
 model.load_state_dict(checkpoint["model_state_dict"])
 model.eval()
