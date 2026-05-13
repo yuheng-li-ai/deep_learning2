@@ -32,3 +32,5 @@ checkpoints/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+.playwright-mcp/
+modelscope-page.png
