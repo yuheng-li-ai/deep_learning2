@@ -1,0 +1,27 @@
+{
+  "device": "cuda:2",
+  "n_val_items": 1024,
+  "radius": 0.35,
+  "surfaces": [
+    {
+      "label": "naive",
+      "model": "vgg_a",
+      "checkpoint": "reports/runs/vgg_a_adam_lr1e-3/best.pt",
+      "grid_size": 13,
+      "center_loss": 1.2257570698857307,
+      "min_loss": 1.2149697914719582,
+      "max_loss": 2.80704990029335,
+      "mean_loss": 1.7244355410072931
+    },
+    {
+      "label": "batchnorm",
+      "model": "vgg_a_bn",
+      "checkpoint": "reports/runs/vgg_a_bn_adam_lr1e-3/best.pt",
+      "grid_size": 13,
+      "center_loss": 0.7132535055279732,
+      "min_loss": 0.7073557302355766,
+      "max_loss": 4.210139691829681,
+      "mean_loss": 1.7017897655360796
+    }
+  ]
+}

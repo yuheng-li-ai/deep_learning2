@@ -860,3 +860,41 @@ Append each experiment using this format:
 - Next action:
   - Commit the loss-landscape metrics, step losses, figure, summary, and updated draft.
   - Use this section as the evidence base for the final LaTeX report's BN optimization analysis.
+
+### 2026-05-13: Local 3D Loss-Surface Visualization
+
+- Commit: pending.
+- Purpose:
+  - Add an intuitive 3D visualization comparing the naive VGG-A checkpoint and the BatchNorm VGG-A checkpoint.
+  - This is a qualitative local surface plot, not the same measurement as the learning-rate envelope experiment above.
+- Method:
+  - Added `codes/VGG_BatchNorm/plot_3d_loss_surface.py`.
+  - Loaded the trained checkpoints:
+    - Naive: `reports/runs/vgg_a_adam_lr1e-3/best.pt`.
+    - BatchNorm: `reports/runs/vgg_a_bn_adam_lr1e-3/best.pt`.
+  - Sampled two random normalized parameter-space directions around each checkpoint.
+  - Evaluated validation cross-entropy on a 2D grid around each checkpoint.
+  - Rendered the two loss surfaces as side-by-side 3D plots.
+- Configuration:
+  - Device used for plotting: `cuda:2`.
+  - Grid size: 13 by 13.
+  - Radius: 0.35.
+  - Validation subset: first 1,024 CIFAR-10 test examples.
+  - Batch size: 128.
+  - Seed: 2020.
+- Output:
+  - Figure: `reports/figures/vgg_a_3d_loss_surface_naive_vs_bn.png`.
+  - Summary: `reports/figures/vgg_a_3d_loss_surface_naive_vs_bn_summary.json`.
+- Numeric summary:
+  - Naive center loss: 1.2258.
+  - Naive min loss: 1.2150.
+  - Naive max loss: 2.8070.
+  - Naive mean surface loss: 1.7244.
+  - BatchNorm center loss: 0.7133.
+  - BatchNorm min loss: 0.7074.
+  - BatchNorm max loss: 4.2101.
+  - BatchNorm mean surface loss: 1.7018.
+- Interpretation:
+  - The center loss is lower for the BN checkpoint on the sampled validation subset, matching the stronger validation performance observed in the main experiments.
+  - Because the plotted directions are random and the subset is small, the 3D surface should be presented as a qualitative illustration rather than a definitive sharpness metric.
+  - The earlier learning-rate envelope remains the stronger evidence for reduced step-size sensitivity.
