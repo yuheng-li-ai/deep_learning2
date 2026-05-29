@@ -930,3 +930,151 @@ Append each experiment using this format:
 - Interpretation:
   - The ModelScope upload now separates the report's final model from auxiliary experimental checkpoints.
   - The organization makes the final deliverable unambiguous while still preserving the major ablation evidence needed to reproduce the report tables.
+
+### 2026-05-29: Strict Requirement Audit and Missing-Item Completion
+
+- GitHub code commit before new GPU work: `37bc376 feat: add loss smoothing and gradient analysis`.
+- Purpose:
+  - Re-audit all project requirements against the current code, runs, figures, draft, and report.
+  - Fill missing or weakly supported requirements without overwriting any previous result directory.
+- Requirement audit:
+  - Single PDF report with GitHub, dataset, and trained-weight links: satisfied in the current LaTeX source, but the final student name and ID are still placeholders.
+  - CIFAR-10 training and test reporting: satisfied through all stored `metrics.json` and `metrics.csv` files.
+  - Required architecture components: satisfied. The VGG-A family contains convolution, max pooling, nonlinear activation, and fully connected layers.
+  - At least one optional component: satisfied with BatchNorm and Dropout variants.
+  - Different numbers of filters/neurons: satisfied by the full VGG-A and VGG-A-Light comparison.
+  - Different activations: satisfied by ReLU, LeakyReLU, and GELU experiments.
+  - Different optimizers using `torch.optim`: satisfied by Adam, AdamW, and code support for SGD.
+  - Loss functions with different regularization: previously weak because all formal runs used plain cross entropy. This was completed by adding `--label-smoothing` support and training a VGG-A-BN-GELU run with cross entropy label smoothing 0.1.
+  - BN vs. no-BN effectiveness: satisfied by matched VGG-A and VGG-A-BN runs.
+  - Loss landscape: satisfied by the four-learning-rate per-step loss-envelope experiment for VGG-A and VGG-A-BN.
+  - Gradient predictiveness and maximum gradient difference: previously missing from quantitative output. This was completed by adding `plot_gradient_smoothness.py` and measuring first-order prediction error plus gradient-difference-per-distance.
+  - Insight visualization: satisfied through training curves, loss envelope, local 3D surface, and gradient smoothness plots.
+- Code changes:
+  - `codes/VGG_BatchNorm/train_cifar.py` now supports `--label-smoothing`.
+  - `codes/VGG_BatchNorm/train_cifar.py` now refuses to write into an output directory that already contains `metrics.json`, `metrics.csv`, `step_losses.csv`, or `best.pt`, unless `--allow-overwrite` is passed intentionally.
+  - `codes/VGG_BatchNorm/plot_gradient_smoothness.py` was added for BN optimization analysis.
+  - Tests were added for label smoothing, overwrite protection, and gradient-analysis argument parsing.
+- Verification before new training:
+  - `python -m unittest discover -s tests`: 18 tests passed.
+  - `python -m compileall codes/VGG_BatchNorm tests`: passed.
+  - CUDA smoke test for the label-smoothing training path passed on `cuda:0`.
+  - CUDA smoke test for the gradient-analysis path passed on `cuda:1`.
+
+### 2026-05-29: Loss-Regularization Ablation with Label Smoothing
+
+- Purpose:
+  - Provide a direct loss-function/regularization ablation required by the assignment.
+  - Keep the original best model untouched and write all new outputs to a new run directory.
+- Run directory:
+  - `reports/runs/vgg_a_bn_gelu_adam_lr1e-3_label_smoothing0.1/`.
+- Figure:
+  - `reports/figures/vgg_a_bn_gelu_label_smoothing_comparison.png`.
+- Configuration:
+  - Model: `vgg_a_bn_gelu`.
+  - Loss: `CrossEntropyLoss(label_smoothing=0.1)`.
+  - Optimizer: Adam.
+  - Learning rate: `1e-3`.
+  - Weight decay: `0.0`.
+  - Epochs: 20.
+  - Batch size: 128.
+  - Device: `cuda:0`.
+  - Seed: 2020.
+- Results:
+  - Best accuracy: 0.8374.
+  - Best test error: 0.1626.
+  - Best epoch: 19.
+  - Final accuracy: 0.8170.
+  - Final validation loss: 1.0366.
+  - Total recorded epoch time: 101.16 seconds.
+- Comparison to plain cross entropy on the same architecture:
+  - VGG-A-BN-GELU with plain cross entropy reached 0.8396 best accuracy and 0.8373 final accuracy.
+  - Label smoothing reached a similar peak but a worse final accuracy and higher final validation loss.
+- Interpretation:
+  - Label smoothing did not improve the final selected model under the fixed 20-epoch protocol.
+  - The result still satisfies the loss-function/regularization ablation requirement and provides negative evidence: the best final submission remains the plain cross-entropy VGG-A-BN-GELU model.
+
+### 2026-05-29: Gradient Predictiveness and Gradient-Difference Analysis
+
+- Purpose:
+  - Quantify the two BN optimization measurements that were listed in the assignment text but not covered by the loss-envelope plot alone.
+- Script:
+  - `codes/VGG_BatchNorm/plot_gradient_smoothness.py`.
+- Outputs:
+  - `reports/figures/vgg_a_gradient_smoothness_bn_vs_no_bn.png`.
+  - `reports/figures/vgg_a_gradient_smoothness_bn_vs_no_bn_summary.json`.
+- Configuration:
+  - Plain checkpoint: `reports/runs/vgg_a_adam_lr1e-3/best.pt`.
+  - BN checkpoint: `reports/runs/vgg_a_bn_adam_lr1e-3/best.pt`.
+  - Validation subset: first 512 CIFAR-10 test examples.
+  - Step sizes along the negative gradient: `1e-4`, `5e-4`, `1e-3`, `2e-3`.
+  - Device: `cuda:1`.
+- Metrics:
+  - First-order loss prediction error: `|L(w - eta grad L(w)) - (L(w) - eta ||grad L(w)||^2)|`.
+  - Gradient-difference-per-distance: `||grad L(w') - grad L(w)|| / ||w' - w||`.
+- Numeric summary:
+  - Plain base loss: 1.3070.
+  - BN base loss: 0.7027.
+  - Plain mean prediction error: 0.0005088.
+  - BN mean prediction error: 0.0005172.
+  - Plain max prediction error: 0.0015551.
+  - BN max prediction error: 0.0015264.
+  - Plain maximum gradient-difference-per-distance: 857.6200.
+  - BN maximum gradient-difference-per-distance: 320.5730.
+- Interpretation:
+  - The first-order prediction error is comparable between the two checkpoints on this local measurement, so it should not be overstated as a strong BN advantage.
+  - The maximum gradient-difference-per-distance is much lower for the BN checkpoint, supporting the claim that the local gradient changes less abruptly along the tested update directions.
+  - Together with the learning-rate loss envelope, this provides stronger and more complete evidence for the BN optimization section.
+
+### 2026-05-29: Consolidated Experimental Record for Report Rewrite
+
+- Primary final model:
+  - VGG-A-BN-GELU with Adam and plain cross entropy.
+  - Best accuracy: 0.8396.
+  - Best test error: 0.1604.
+  - Final accuracy: 0.8373.
+  - Parameters: 9,756,426.
+- Main controlled comparisons:
+  - VGG-A: best accuracy 0.7651, final accuracy 0.7411, parameters 9,750,922.
+  - VGG-A-BN: best accuracy 0.8324, final accuracy 0.8257, parameters 9,756,426.
+  - VGG-A-Dropout: best accuracy 0.7419, final accuracy 0.7348.
+  - VGG-A-Light: best accuracy 0.7027, final accuracy 0.6818, parameters 285,162.
+  - VGG-A-BN with AdamW: best and final accuracy 0.8302.
+  - VGG-A-BN-LeakyReLU: best accuracy 0.8254, final accuracy 0.8194.
+  - VGG-A-BN-GELU with label smoothing: best accuracy 0.8374, final accuracy 0.8170.
+- BN optimization evidence:
+  - Matched BN vs no-BN: best accuracy improves from 0.7651 to 0.8324.
+  - Loss envelope: BN reduces mean envelope width from 0.4084 to 0.2147.
+  - Final loss range across learning rates narrows from 0.2188 to 0.0245.
+  - Gradient-difference-per-distance maximum falls from 857.6200 to 320.5730 in the local gradient analysis.
+  - 3D random-slice visualization shows a lower BN center loss, but remains qualitative.
+- Report selection:
+  - Main text should focus on the baseline, BN, final GELU model, loss envelope, and gradient smoothness.
+  - Dropout, light-width, AdamW, LeakyReLU, label smoothing, and 3D surface should be reported compactly; less central details can move to the appendix.
+
+### 2026-05-29: Final Paper Rewrite Plan
+
+- Writing constraints:
+  - English only.
+  - Standard double-column paper format.
+  - No bullet-style AI answer format in the paper body.
+  - Main results should be written in professional academic prose.
+  - Single-column figures should use compact placement and, where appropriate, `wrapfigure` so that small figures do not create excessive white space.
+  - Wide comparison figures and large tables may use `figure*` or `table*`.
+  - Captions must be below figures.
+  - Material that is not central to the final conclusion should appear after the references in an appendix.
+- Main-paper plan:
+  - Title and metadata: include GitHub, CIFAR-10 dataset, ModelScope trained-weight links, and placeholders for name and student ID until the user provides them.
+  - Abstract: state the final test error, BN improvement, and the two optimization findings.
+  - Introduction: briefly frame CIFAR-10, VGG-A, and the BN optimization question.
+  - Method: describe data preprocessing, model family, training protocol, and evaluation metrics concisely.
+  - Main results: present the model comparison table and explain why VGG-A-BN-GELU is selected.
+  - BatchNorm analysis: present the matched BN/no-BN comparison, the learning-rate loss envelope, and the gradient smoothness results.
+  - Discussion: interpret regularization, capacity, optimizer, and activation outcomes without overclaiming.
+  - Conclusion: state the final model and what the experiments show about BN.
+- Appendix plan:
+  - Additional architecture/ablation details.
+  - Full learning-rate sweep table.
+  - Label-smoothing loss ablation.
+  - 3D random loss-surface visualization.
+  - Notes on requirement coverage and reproducibility.
