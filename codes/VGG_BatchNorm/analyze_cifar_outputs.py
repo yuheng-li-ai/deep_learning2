@@ -60,6 +60,11 @@ def parse_args():
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--n-eval-items", type=int, default=-1)
     parser.add_argument("--sample-items", type=int, default=30)
+    parser.add_argument(
+        "--allow-overwrite",
+        action="store_true",
+        help="Allow existing analysis artifacts in --output-dir to be overwritten.",
+    )
     return parser.parse_args()
 
 
@@ -216,10 +221,32 @@ def save_architecture(rows, csv_path, json_path):
         json.dump(rows, f, indent=2)
 
 
+def planned_output_paths(output_dir):
+    return [
+        output_dir / "cifar10_sample_grid.png",
+        output_dir / "first_layer_filters.png",
+        output_dir / "confusion_matrix.png",
+        output_dir / "architecture_table.csv",
+        output_dir / "architecture_table.json",
+        output_dir / "analysis_summary.json",
+    ]
+
+
+def prepare_output_dir(output_dir, allow_overwrite=False):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    existing_outputs = [path for path in planned_output_paths(output_dir) if path.exists()]
+    if existing_outputs and not allow_overwrite:
+        existing = ", ".join(str(path) for path in existing_outputs)
+        raise FileExistsError(
+            f"Refusing to overwrite existing analysis artifact(s): {existing}. "
+            "Use a new --output-dir or pass --allow-overwrite intentionally."
+        )
+
+
 def main():
     args = parse_args()
     output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    prepare_output_dir(output_dir, allow_overwrite=args.allow_overwrite)
     device = resolve_device(args.device)
 
     sample_loader = get_cifar_loader(

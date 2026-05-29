@@ -24,7 +24,22 @@ def parse_args():
     parser.add_argument("--output", required=True)
     parser.add_argument("--summary", required=True)
     parser.add_argument("--title", default="Loss and Regularization Ablation")
+    parser.add_argument(
+        "--allow-overwrite",
+        action="store_true",
+        help="Allow existing output and summary files to be overwritten.",
+    )
     return parser.parse_args()
+
+
+def prepare_outputs(paths, allow_overwrite=False):
+    existing_outputs = [path for path in paths if path.exists()]
+    if existing_outputs and not allow_overwrite:
+        existing = ", ".join(str(path) for path in existing_outputs)
+        raise FileExistsError(
+            f"Refusing to overwrite existing regularization artifact(s): {existing}. "
+            "Use new paths or pass --allow-overwrite intentionally."
+        )
 
 
 def plot_regularization(runs, output_path, title):
@@ -58,10 +73,12 @@ def plot_regularization(runs, output_path, title):
 
 def main():
     args = parse_args()
-    runs = [(name, load_metrics(path)) for name, path in args.run]
-    plot_regularization(runs, args.output, args.title)
-    rows = [summarize_run(name, metrics) for name, metrics in runs]
+    output_path = Path(args.output)
     summary_path = Path(args.summary)
+    prepare_outputs([output_path, summary_path], allow_overwrite=args.allow_overwrite)
+    runs = [(name, load_metrics(path)) for name, path in args.run]
+    plot_regularization(runs, output_path, args.title)
+    rows = [summarize_run(name, metrics) for name, metrics in runs]
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     with summary_path.open("w", encoding="utf-8") as f:
         json.dump(rows, f, indent=2)
