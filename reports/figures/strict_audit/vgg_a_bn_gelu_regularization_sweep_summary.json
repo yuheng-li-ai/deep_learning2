@@ -1,0 +1,62 @@
+[
+  {
+    "name": "CE eps0",
+    "parameters": 9756426,
+    "best_epoch": 19,
+    "best_val_accuracy": 0.8396,
+    "best_val_error": 0.1604,
+    "final_train_accuracy": 0.98912,
+    "final_val_accuracy": 0.8373,
+    "final_val_loss": 0.7709754545211792
+  },
+  {
+    "name": "LS eps0.05",
+    "parameters": 9756426,
+    "best_epoch": 17,
+    "best_val_accuracy": 0.8349,
+    "best_val_error": 0.16510000000000002,
+    "final_train_accuracy": 0.9876,
+    "final_val_accuracy": 0.8315,
+    "final_val_loss": 0.8561514598846436
+  },
+  {
+    "name": "LS eps0.10",
+    "parameters": 9756426,
+    "best_epoch": 19,
+    "best_val_accuracy": 0.8374,
+    "best_val_error": 0.16259999999999997,
+    "final_train_accuracy": 0.9891,
+    "final_val_accuracy": 0.817,
+    "final_val_loss": 1.036605456161499
+  },
+  {
+    "name": "LS eps0.20",
+    "parameters": 9756426,
+    "best_epoch": 19,
+    "best_val_accuracy": 0.8432,
+    "best_val_error": 0.15680000000000005,
+    "final_train_accuracy": 0.98786,
+    "final_val_accuracy": 0.8288,
+    "final_val_loss": 1.246242540359497
+  },
+  {
+    "name": "AdamW wd1e-4",
+    "parameters": 9756426,
+    "best_epoch": 19,
+    "best_val_accuracy": 0.8366,
+    "best_val_error": 0.1634,
+    "final_train_accuracy": 0.9882,
+    "final_val_accuracy": 0.8169,
+    "final_val_loss": 0.9285406879425049
+  },
+  {
+    "name": "AdamW wd5e-4",
+    "parameters": 9756426,
+    "best_epoch": 18,
+    "best_val_accuracy": 0.833,
+    "best_val_error": 0.16700000000000004,
+    "final_train_accuracy": 0.98666,
+    "final_val_accuracy": 0.8317,
+    "final_val_loss": 0.8424294134140015
+  }
+]

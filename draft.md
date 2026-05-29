@@ -329,9 +329,9 @@ Append each experiment using this format:
 
 ## 9. Open Items
 
-- Student name and ID will be filled in near final report writing.
-- The final model-weight hosting location is not decided yet.
-- The final dataset link can use the official CIFAR-10 website or a net-disk mirror.
+- Student name and ID are now filled in as Yuheng Li and 23307130334.
+- The final model-weight hosting location is ModelScope: `https://www.modelscope.cn/models/yuhengli/deep-learning2-final-model/files`.
+- The final dataset link uses the official CIFAR-10 website: `https://www.cs.toronto.edu/~kriz/cifar.html`.
 - Training commands that need CUDA should run outside the normal sandbox because PyTorch CUDA is unavailable inside the sandbox.
 
 ## 10. Implementation Log
@@ -938,7 +938,7 @@ Append each experiment using this format:
   - Re-audit all project requirements against the current code, runs, figures, draft, and report.
   - Fill missing or weakly supported requirements without overwriting any previous result directory.
 - Requirement audit:
-  - Single PDF report with GitHub, dataset, and trained-weight links: satisfied in the current LaTeX source, but the final student name and ID are still placeholders.
+  - Single PDF report with GitHub, dataset, trained-weight link, student name, and student ID: satisfied in the current LaTeX source.
   - CIFAR-10 training and test reporting: satisfied through all stored `metrics.json` and `metrics.csv` files.
   - Required architecture components: satisfied. The VGG-A family contains convolution, max pooling, nonlinear activation, and fully connected layers.
   - At least one optional component: satisfied with BatchNorm and Dropout variants.
@@ -1064,7 +1064,7 @@ Append each experiment using this format:
   - Captions must be below figures.
   - Material that is not central to the final conclusion should appear after the references in an appendix.
 - Main-paper plan:
-  - Title and metadata: include GitHub, CIFAR-10 dataset, ModelScope trained-weight links, and placeholders for name and student ID until the user provides them.
+  - Title and metadata: include GitHub, CIFAR-10 dataset, ModelScope trained-weight link, student name, and student ID.
   - Abstract: state the final test error, BN improvement, and the two optimization findings.
   - Introduction: briefly frame CIFAR-10, VGG-A, and the BN optimization question.
   - Method: describe data preprocessing, model family, training protocol, and evaluation metrics concisely.
@@ -1078,3 +1078,89 @@ Append each experiment using this format:
   - Label-smoothing loss ablation.
   - 3D random loss-surface visualization.
   - Notes on requirement coverage and reproducibility.
+
+### 2026-05-29: Strict-Audit Regularization Sweep and Final-Model Analysis
+
+- Student metadata for the final report:
+  - Student name: Yuheng Li.
+  - Student ID: 23307130334.
+- GitHub code link:
+  - `https://github.com/yuheng-li-ai/deep_learning2`.
+- CIFAR-10 dataset link:
+  - `https://www.cs.toronto.edu/~kriz/cifar.html`.
+- Trained-weight link:
+  - `https://www.modelscope.cn/models/yuhengli/deep-learning2-final-model/files`.
+- New code commits before and during this phase:
+  - `3aa8846 feat: add report analysis artifacts`.
+  - `70c2fcc fix: protect analysis artifacts from overwrite`.
+- Safety and reproducibility checks:
+  - Weight-decay training path smoke test passed on a partial CIFAR-10 run and produced `best.pt`, `metrics.json`, and `metrics.csv`.
+  - Analysis script smoke test passed on `cuda:1` with 64 test examples and generated sample, filter, confusion, architecture, and summary artifacts under `/tmp/pj2_analysis_smoke`.
+  - `python -m unittest discover -s tests`: 22 tests passed after adding artifact overwrite protection.
+  - `python -m compileall codes/VGG_BatchNorm tests`: passed.
+- New result directories:
+  - `reports/runs/strict_audit/vgg_a_bn_gelu_adam_lr1e-3_label_smoothing0.05/`.
+  - `reports/runs/strict_audit/vgg_a_bn_gelu_adam_lr1e-3_label_smoothing0.2/`.
+  - `reports/runs/strict_audit/vgg_a_bn_gelu_adamw_lr1e-3_wd1e-4/`.
+  - `reports/runs/strict_audit/vgg_a_bn_gelu_adamw_lr1e-3_wd5e-4/`.
+- New figure and analysis directory:
+  - `reports/figures/strict_audit/vgg_a_bn_gelu_regularization_sweep.png`.
+  - `reports/figures/strict_audit/vgg_a_bn_gelu_regularization_sweep_summary.json`.
+  - `reports/figures/strict_audit/final_model_analysis/`.
+- Loss and weight-regularization results on the VGG-A-BN-GELU model:
+  - Plain cross entropy, Adam, no weight decay: best accuracy 0.8396, best error 0.1604, final accuracy 0.8373, final loss 0.7710.
+  - Label smoothing 0.05, Adam: best accuracy 0.8349, best error 0.1651, final accuracy 0.8315, final loss 0.8562.
+  - Label smoothing 0.10, Adam: best accuracy 0.8374, best error 0.1626, final accuracy 0.8170, final loss 1.0366.
+  - Label smoothing 0.20, Adam: best accuracy 0.8432, best error 0.1568, final accuracy 0.8288, final loss 1.2462.
+  - AdamW with weight decay 1e-4: best accuracy 0.8366, best error 0.1634, final accuracy 0.8169, final loss 0.9285.
+  - AdamW with weight decay 5e-4: best accuracy 0.8330, best error 0.1670, final accuracy 0.8317, final loss 0.8424.
+- Interpretation for the main report:
+  - The loss/regularization requirement is now strongly supported by a four-point label-smoothing sweep and a two-point AdamW weight-decay comparison.
+  - Label smoothing 0.20 achieves the highest peak accuracy in the sweep, but it ends with a worse final accuracy and much higher final validation loss than plain cross entropy. This suggests that smoothing can improve a single best checkpoint under this short schedule but also makes the held-out objective less directly comparable and less stable at the final epoch.
+  - The final selected model remains the plain cross-entropy VGG-A-BN-GELU checkpoint because it has the best final accuracy, the lowest final validation loss among the tested regularization settings, and a peak accuracy within 0.36 percentage points of the label-smoothing 0.20 run.
+  - Weight decay through AdamW does not improve the selected model under the fixed 20-epoch protocol. The 1e-4 run reaches 0.8366 best accuracy but degrades at the final epoch, while 5e-4 is more stable at the final epoch but lower in peak accuracy.
+- Final-model interpretation artifacts:
+  - Test accuracy from full confusion-matrix evaluation: 0.8396.
+  - Test loss from full confusion-matrix evaluation: 0.7951.
+  - Parameter count: 9,756,426.
+  - Per-class accuracy: airplane 0.8700, automobile 0.9360, bird 0.8170, cat 0.6640, deer 0.8650, dog 0.7250, frog 0.9070, horse 0.8420, ship 0.8610, truck 0.9090.
+  - The weakest classes are cat and dog, mainly because their images are visually close to other animal classes. Automobile, truck, frog, and airplane are substantially stronger.
+  - `architecture_table.csv` confirms the final model contains Conv2d, BatchNorm2d, GELU, MaxPool2d, and Linear layers. Its output shapes progress from `64 x 32 x 32` to a `512 x 1 x 1` feature tensor before the three linear classifier layers.
+- Updated final-paper plan:
+  - Main text should include a clear loss/regularization subsection with the sweep table and the regularization curve figure.
+  - Main text should include the architecture table and a compact interpretation section with confusion matrix and first-layer filters.
+  - Appendix should hold reproducibility commands, learning-rate sweep details, 3D loss surface, and a requirement-coverage audit.
+
+### 2026-05-29: Final Report Compilation and Layout Audit
+
+- Final source:
+  - `final_report.tex`.
+- Final PDF:
+  - `final_report.pdf`.
+- Format:
+  - English two-column paper style.
+  - Student name, student ID, GitHub link, CIFAR-10 dataset link, and ModelScope trained-weight link included in the title block.
+  - References appear before the appendix.
+  - Main text contains the central VGG-A/BN comparison, final model selection, regularization sweep, model interpretation, loss-envelope analysis, and gradient analysis.
+  - Appendix contains the learning-rate sweep table, 3D loss surface, per-class accuracy, reproducibility records, and requirement coverage audit.
+- Layout result:
+  - Compiled page count: 6 pages.
+  - A forced 7-page version was tested by adding a wide full-architecture table, but it created an almost blank final page. The compact 6-page version was kept because it better satisfies the spacing requirement.
+  - `pdfinfo final_report.pdf`: 6 pages, A4.
+  - `rg -n "Overfull|undefined references|undefined|LaTeX Warning|Package .*Warning" final_report.log`: no matches.
+  - Visual inspection of rendered pages found no text overlap, no colored hyperlink boxes, and no key figure rendered as a tiny inline image.
+- ModelScope status:
+  - The final selected checkpoint and the original core ablation checkpoints are already uploaded to ModelScope.
+  - An attempt to upload the new strict-audit regularization checkpoints failed because the SDK reported `user not logged in`.
+  - No token was inspected or printed. The final report still uses the valid ModelScope trained-weight link for the final model.
+- Final requirement audit:
+  - Required layers: satisfied by Conv2d, MaxPool2d, GELU/ReLU, and Linear layers.
+  - Optional components: satisfied by BatchNorm and Dropout experiments.
+  - Different neurons/filters: satisfied by VGG-A and VGG-A-Light.
+  - Different loss/regularization: satisfied by cross entropy, label smoothing 0.05/0.10/0.20, and AdamW weight decay 1e-4/5e-4.
+  - Different activations: satisfied by ReLU, LeakyReLU, and GELU.
+  - Optimizer strategy: satisfied by Adam and AdamW with `torch.optim`.
+  - Visualizations: satisfied by training curves, loss envelope, gradient smoothness, 3D surface, CIFAR-10 samples, first-layer filters, and confusion matrix.
+  - Best test error and final model structure: satisfied by the final VGG-A-BN-GELU report sections and architecture table.
+  - VGG-A vs VGG-A-BN comparison: satisfied by matched results and curves.
+  - BN optimization analysis: satisfied by loss variation/loss envelope, gradient predictiveness, and maximum gradient-difference-per-distance.

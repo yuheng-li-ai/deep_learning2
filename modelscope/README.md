@@ -60,10 +60,9 @@ The `ablations/` directory contains auxiliary checkpoints used for the experimen
 - `vgg_a_light_adam_lr1e-3_best.pt`: reduced-width VGG-A-Light.
 - `vgg_a_bn_adamw_lr1e-3_wd1e-4_best.pt`: VGG-A-BN trained with AdamW and weight decay.
 - `vgg_a_bn_leaky_relu_adam_lr1e-3_best.pt`: VGG-A-BN with LeakyReLU.
-
 Each ablation checkpoint has a matching `*_metrics.json` file with the training configuration and per-epoch metrics.
 
-Loss-landscape learning-rate sweep checkpoints are not uploaded because they are auxiliary trajectory-analysis runs. Their metrics, step-loss curves, figures, and source code are available in the GitHub repository.
+Loss-landscape learning-rate sweep checkpoints are not uploaded because they are auxiliary trajectory-analysis runs. Their metrics, step-loss curves, figures, and source code are available in the GitHub repository. The strict-audit regularization sweep outputs are stored under `reports/runs/strict_audit/` in the GitHub repository.
 
 ## Loading the Final Checkpoint
 

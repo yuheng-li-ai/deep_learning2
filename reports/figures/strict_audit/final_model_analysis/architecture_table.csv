@@ -1,0 +1,35 @@
+layer,type,output_shape,parameters
+features.0,Conv2d,"[1, 64, 32, 32]",1792
+features.1,BatchNorm2d,"[1, 64, 32, 32]",128
+features.2,GELU,"[1, 64, 32, 32]",0
+features.3,MaxPool2d,"[1, 64, 16, 16]",0
+features.4,Conv2d,"[1, 128, 16, 16]",73856
+features.5,BatchNorm2d,"[1, 128, 16, 16]",256
+features.6,GELU,"[1, 128, 16, 16]",0
+features.7,MaxPool2d,"[1, 128, 8, 8]",0
+features.8,Conv2d,"[1, 256, 8, 8]",295168
+features.9,BatchNorm2d,"[1, 256, 8, 8]",512
+features.10,GELU,"[1, 256, 8, 8]",0
+features.11,Conv2d,"[1, 256, 8, 8]",590080
+features.12,BatchNorm2d,"[1, 256, 8, 8]",512
+features.13,GELU,"[1, 256, 8, 8]",0
+features.14,MaxPool2d,"[1, 256, 4, 4]",0
+features.15,Conv2d,"[1, 512, 4, 4]",1180160
+features.16,BatchNorm2d,"[1, 512, 4, 4]",1024
+features.17,GELU,"[1, 512, 4, 4]",0
+features.18,Conv2d,"[1, 512, 4, 4]",2359808
+features.19,BatchNorm2d,"[1, 512, 4, 4]",1024
+features.20,GELU,"[1, 512, 4, 4]",0
+features.21,MaxPool2d,"[1, 512, 2, 2]",0
+features.22,Conv2d,"[1, 512, 2, 2]",2359808
+features.23,BatchNorm2d,"[1, 512, 2, 2]",1024
+features.24,GELU,"[1, 512, 2, 2]",0
+features.25,Conv2d,"[1, 512, 2, 2]",2359808
+features.26,BatchNorm2d,"[1, 512, 2, 2]",1024
+features.27,GELU,"[1, 512, 2, 2]",0
+features.28,MaxPool2d,"[1, 512, 1, 1]",0
+classifier.0,Linear,"[1, 512]",262656
+classifier.1,GELU,"[1, 512]",0
+classifier.2,Linear,"[1, 512]",262656
+classifier.3,GELU,"[1, 512]",0
+classifier.4,Linear,"[1, 10]",5130

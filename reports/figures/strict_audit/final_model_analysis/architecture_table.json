@@ -1,0 +1,206 @@
+[
+  {
+    "layer": "features.0",
+    "type": "Conv2d",
+    "output_shape": "[1, 64, 32, 32]",
+    "parameters": 1792
+  },
+  {
+    "layer": "features.1",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 64, 32, 32]",
+    "parameters": 128
+  },
+  {
+    "layer": "features.2",
+    "type": "GELU",
+    "output_shape": "[1, 64, 32, 32]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.3",
+    "type": "MaxPool2d",
+    "output_shape": "[1, 64, 16, 16]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.4",
+    "type": "Conv2d",
+    "output_shape": "[1, 128, 16, 16]",
+    "parameters": 73856
+  },
+  {
+    "layer": "features.5",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 128, 16, 16]",
+    "parameters": 256
+  },
+  {
+    "layer": "features.6",
+    "type": "GELU",
+    "output_shape": "[1, 128, 16, 16]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.7",
+    "type": "MaxPool2d",
+    "output_shape": "[1, 128, 8, 8]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.8",
+    "type": "Conv2d",
+    "output_shape": "[1, 256, 8, 8]",
+    "parameters": 295168
+  },
+  {
+    "layer": "features.9",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 256, 8, 8]",
+    "parameters": 512
+  },
+  {
+    "layer": "features.10",
+    "type": "GELU",
+    "output_shape": "[1, 256, 8, 8]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.11",
+    "type": "Conv2d",
+    "output_shape": "[1, 256, 8, 8]",
+    "parameters": 590080
+  },
+  {
+    "layer": "features.12",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 256, 8, 8]",
+    "parameters": 512
+  },
+  {
+    "layer": "features.13",
+    "type": "GELU",
+    "output_shape": "[1, 256, 8, 8]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.14",
+    "type": "MaxPool2d",
+    "output_shape": "[1, 256, 4, 4]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.15",
+    "type": "Conv2d",
+    "output_shape": "[1, 512, 4, 4]",
+    "parameters": 1180160
+  },
+  {
+    "layer": "features.16",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 512, 4, 4]",
+    "parameters": 1024
+  },
+  {
+    "layer": "features.17",
+    "type": "GELU",
+    "output_shape": "[1, 512, 4, 4]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.18",
+    "type": "Conv2d",
+    "output_shape": "[1, 512, 4, 4]",
+    "parameters": 2359808
+  },
+  {
+    "layer": "features.19",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 512, 4, 4]",
+    "parameters": 1024
+  },
+  {
+    "layer": "features.20",
+    "type": "GELU",
+    "output_shape": "[1, 512, 4, 4]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.21",
+    "type": "MaxPool2d",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.22",
+    "type": "Conv2d",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 2359808
+  },
+  {
+    "layer": "features.23",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 1024
+  },
+  {
+    "layer": "features.24",
+    "type": "GELU",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.25",
+    "type": "Conv2d",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 2359808
+  },
+  {
+    "layer": "features.26",
+    "type": "BatchNorm2d",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 1024
+  },
+  {
+    "layer": "features.27",
+    "type": "GELU",
+    "output_shape": "[1, 512, 2, 2]",
+    "parameters": 0
+  },
+  {
+    "layer": "features.28",
+    "type": "MaxPool2d",
+    "output_shape": "[1, 512, 1, 1]",
+    "parameters": 0
+  },
+  {
+    "layer": "classifier.0",
+    "type": "Linear",
+    "output_shape": "[1, 512]",
+    "parameters": 262656
+  },
+  {
+    "layer": "classifier.1",
+    "type": "GELU",
+    "output_shape": "[1, 512]",
+    "parameters": 0
+  },
+  {
+    "layer": "classifier.2",
+    "type": "Linear",
+    "output_shape": "[1, 512]",
+    "parameters": 262656
+  },
+  {
+    "layer": "classifier.3",
+    "type": "GELU",
+    "output_shape": "[1, 512]",
+    "parameters": 0
+  },
+  {
+    "layer": "classifier.4",
+    "type": "Linear",
+    "output_shape": "[1, 10]",
+    "parameters": 5130
+  }
+]
