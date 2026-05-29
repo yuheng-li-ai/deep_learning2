@@ -43,10 +43,16 @@ def parse_args():
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=0.0)
+    parser.add_argument("--label-smoothing", type=float, default=0.0)
     parser.add_argument("--optimizer", choices=["adam", "adamw", "sgd"], default="adam")
     parser.add_argument("--seed", type=int, default=2020)
     parser.add_argument("--n-train-items", type=int, default=-1)
     parser.add_argument("--n-val-items", type=int, default=-1)
+    parser.add_argument(
+        "--allow-overwrite",
+        action="store_true",
+        help="Allow writing into an output directory that already contains results.",
+    )
     parser.add_argument(
         "--record-step-losses",
         action="store_true",
@@ -84,6 +90,24 @@ def build_optimizer(name, model, lr, weight_decay):
             model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay
         )
     raise ValueError(f"Unsupported optimizer: {name}")
+
+
+def build_criterion(label_smoothing):
+    if label_smoothing < 0.0 or label_smoothing >= 1.0:
+        raise ValueError("label_smoothing must be in the interval [0, 1).")
+    return nn.CrossEntropyLoss(label_smoothing=label_smoothing)
+
+
+def prepare_output_dir(output_dir, allow_overwrite=False):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    protected_names = {"metrics.json", "metrics.csv", "step_losses.csv", "best.pt"}
+    existing_outputs = [path for path in output_dir.iterdir() if path.name in protected_names]
+    if existing_outputs and not allow_overwrite:
+        names = ", ".join(sorted(path.name for path in existing_outputs))
+        raise FileExistsError(
+            f"{output_dir} already contains training outputs ({names}). "
+            "Use a new --output-dir or pass --allow-overwrite intentionally."
+        )
 
 
 @torch.no_grad()
@@ -213,7 +237,7 @@ def save_metrics(output_dir, metrics, step_losses=None):
 
 def run_training(args):
     output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    prepare_output_dir(output_dir, allow_overwrite=args.allow_overwrite)
 
     device = resolve_device(args.device)
     set_random_seeds(args.seed, device)
@@ -237,7 +261,7 @@ def run_training(args):
 
     model = MODEL_REGISTRY[args.model]().to(device)
     optimizer = build_optimizer(args.optimizer, model, args.lr, args.weight_decay)
-    criterion = nn.CrossEntropyLoss()
+    criterion = build_criterion(args.label_smoothing)
 
     metrics = {
         "config": vars(args),

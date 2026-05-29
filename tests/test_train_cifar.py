@@ -11,7 +11,13 @@ VGG_ROOT = PROJECT_ROOT / "codes" / "VGG_BatchNorm"
 sys.path.insert(0, str(VGG_ROOT))
 
 from models.vgg import VGG_A_Light
-from train_cifar import build_optimizer, resolve_device, save_metrics
+from train_cifar import (
+    build_criterion,
+    build_optimizer,
+    prepare_output_dir,
+    resolve_device,
+    save_metrics,
+)
 
 
 class TrainCifarTests(unittest.TestCase):
@@ -30,6 +36,24 @@ class TrainCifarTests(unittest.TestCase):
                 )
 
                 self.assertIsInstance(optimizer, torch.optim.Optimizer)
+
+    def test_build_criterion_supports_label_smoothing(self):
+        criterion = build_criterion(0.1)
+
+        self.assertIsInstance(criterion, torch.nn.CrossEntropyLoss)
+        self.assertAlmostEqual(criterion.label_smoothing, 0.1)
+
+    def test_build_criterion_rejects_invalid_label_smoothing(self):
+        with self.assertRaises(ValueError):
+            build_criterion(1.0)
+
+    def test_prepare_output_dir_refuses_to_overwrite_metrics(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            (output_dir / "metrics.json").write_text("{}", encoding="utf-8")
+
+            with self.assertRaises(FileExistsError):
+                prepare_output_dir(output_dir)
 
     def test_save_metrics_writes_step_losses_when_provided(self):
         metrics = {
